@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Anime Fighters Simulator - Demo Jogável (Godot 4.x Clone)</title>
     <style>
         * {
@@ -18,6 +18,11 @@
             overflow: hidden;
             background-color: #1a1e29;
             color: #fff;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
         }
         #canvas-container {
             width: 100%;
@@ -437,12 +442,217 @@
             z-index: 5;
             transition: all 0.6s ease-out;
         }
+
+        /* --- MOBILE TOUCH CONTROLS --- */
+        #mobile-controls-container {
+            display: none;
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        #joystick-zone {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            width: 136px;
+            height: 136px;
+            pointer-events: auto;
+            touch-action: none;
+        }
+
+        #joystick-base {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(18, 26, 42, 0.65);
+            border: 2px solid rgba(85, 214, 255, 0.45);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 0 14px rgba(85, 214, 255, 0.2);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        #joystick-stick {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #55d6ff 0%, #1f5f99 100%);
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+            position: absolute;
+            transform: translate(0, 0);
+            pointer-events: none;
+            transition: transform 0.04s ease-out;
+        }
+
+        #mobile-actions {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: grid;
+            grid-template-columns: repeat(2, 60px);
+            grid-gap: 12px;
+            pointer-events: auto;
+        }
+
+        .mobile-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(22, 30, 46, 0.88);
+            border: 2px solid #3d5375;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .mobile-btn:active {
+            transform: scale(0.92);
+            background: #2e4164;
+        }
+
+        .mobile-btn .m-icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .mobile-btn .m-txt {
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .mobile-btn.btn-active {
+            background: rgba(46, 204, 113, 0.35);
+            border-color: #2ecc71;
+            color: #2ecc71;
+            box-shadow: 0 0 14px rgba(46, 204, 113, 0.7);
+        }
+
+        .mobile-btn.btn-highlight {
+            border-color: #f1c40f;
+            animation: pulse-glow 1.4s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 4px rgba(241, 196, 15, 0.4); transform: scale(1); }
+            to { box-shadow: 0 0 16px rgba(241, 196, 15, 0.95); transform: scale(1.06); }
+        }
+
+        /* RESPONSIVIDADE MOBILE */
+        @media (max-width: 850px), (pointer: coarse) {
+            #top-bar {
+                top: 6px;
+                padding: 6px 12px;
+                gap: 2px;
+                min-width: 190px;
+            }
+            #island-title { font-size: 13px; }
+            #currency-text { font-size: 12px; }
+            #team-dps-text { font-size: 10px; }
+
+            #target-panel {
+                top: 68px;
+                padding: 5px 10px;
+                min-width: 180px;
+            }
+            #target-name { font-size: 13px; }
+
+            #bottom-bar {
+                bottom: auto;
+                top: 6px;
+                left: auto;
+                right: 8px;
+                transform: none;
+                flex-direction: column;
+                gap: 4px;
+            }
+            #bottom-bar .btn {
+                padding: 4px 8px;
+                font-size: 10px;
+                border-radius: 6px;
+            }
+
+            #sprint-badge {
+                display: none !important;
+            }
+
+            #controls-badge {
+                display: none !important;
+            }
+
+            #interact-prompt {
+                font-size: 12px;
+                padding: 10px 16px;
+                cursor: pointer;
+                pointer-events: auto;
+            }
+
+            .modal {
+                width: 95vw !important;
+                max-width: 95vw !important;
+                height: 86vh !important;
+                max-height: 86vh !important;
+                padding: 12px;
+            }
+            .modal-title { font-size: 14px; }
+
+            .inv-grid {
+                grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+                gap: 6px;
+            }
+        }
     </style>
     <!-- Three.js CDN for Low-Poly 3D rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <div id="canvas-container"></div>
+
+    <!-- MOBILE TOUCH CONTROLS -->
+    <div id="mobile-controls-container">
+        <!-- VIRTUAL JOYSTICK -->
+        <div id="joystick-zone">
+            <div id="joystick-base">
+                <div id="joystick-stick"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT ACTION BUTTONS -->
+        <div id="mobile-actions">
+            <button id="mobile-btn-target" class="mobile-btn" type="button" title="Focar / Desmarcar Inimigo">
+                <span class="m-icon">🎯</span>
+                <span class="m-txt">Alvo</span>
+            </button>
+            <button id="mobile-btn-interact" class="mobile-btn" type="button" title="Interagir">
+                <span class="m-icon">💬</span>
+                <span class="m-txt">[E] Ação</span>
+            </button>
+            <button id="mobile-btn-sprint" class="mobile-btn" type="button" title="Ativar Corrida">
+                <span class="m-icon">⚡</span>
+                <span class="m-txt">Sprint</span>
+            </button>
+            <button id="mobile-btn-jump" class="mobile-btn" type="button" title="Pular">
+                <span class="m-icon">🦘</span>
+                <span class="m-txt">Pular</span>
+            </button>
+        </div>
+    </div>
 
     <!-- TOP HUD -->
     <div id="top-bar">
@@ -1229,7 +1439,7 @@
             updateHUD();
         }
 
-        /* --- INPUT HANDLING & SPRINT MECHANIC --- */
+        /* --- INPUT HANDLING, SPRINT & MOBILE CONTROLS --- */
         const keys = {};
         let isRightMouseDown = false;
         let prevMousePos = { x: 0, y: 0 };
@@ -1237,6 +1447,240 @@
         let currentTarget = null;
         let playerVelY = 0;
         let isGrounded = true;
+
+        /* MOBILE CONTROLS STATE */
+        let mobileSprintActive = false;
+        let joystickVector = { x: 0, y: 0 };
+        let joystickTouchId = null;
+        let joystickStart = { x: 0, y: 0 };
+        const JOYSTICK_MAX_RADIUS = 38;
+
+        const mobileControlsContainer = document.getElementById('mobile-controls-container');
+        const joystickBase = document.getElementById('joystick-base');
+        const joystickStick = document.getElementById('joystick-stick');
+        const joystickZone = document.getElementById('joystick-zone');
+        const mobileBtnJump = document.getElementById('mobile-btn-jump');
+        const mobileBtnSprint = document.getElementById('mobile-btn-sprint');
+        const mobileBtnInteract = document.getElementById('mobile-btn-interact');
+        const mobileBtnTarget = document.getElementById('mobile-btn-target');
+
+        function setupMobileControls() {
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 850;
+            if (isTouch && mobileControlsContainer) {
+                mobileControlsContainer.style.display = 'block';
+            }
+
+            // Desbloqueio global de áudio no primeiro toque
+            window.addEventListener('touchstart', () => { initAudio(); }, { passive: true, once: true });
+            window.addEventListener('touchend', () => { initAudio(); }, { passive: true, once: true });
+
+            // 1. Virtual Joystick
+            if (joystickZone) {
+                joystickZone.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    if (joystickTouchId !== null) return;
+                    const touch = e.changedTouches[0];
+                    joystickTouchId = touch.identifier;
+                    const rect = joystickBase.getBoundingClientRect();
+                    joystickStart = {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2
+                    };
+                    updateJoystick(touch.clientX, touch.clientY);
+                }, { passive: false });
+
+                window.addEventListener('touchmove', e => {
+                    if (joystickTouchId === null) return;
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === joystickTouchId) {
+                            e.preventDefault();
+                            updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+                            break;
+                        }
+                    }
+                }, { passive: false });
+
+                function stopJoystick() {
+                    joystickTouchId = null;
+                    joystickVector = { x: 0, y: 0 };
+                    if (joystickStick) joystickStick.style.transform = 'translate(0px, 0px)';
+                }
+
+                window.addEventListener('touchend', e => {
+                    if (joystickTouchId === null) return;
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === joystickTouchId) {
+                            stopJoystick();
+                            break;
+                        }
+                    }
+                });
+                window.addEventListener('touchcancel', stopJoystick);
+
+                function updateJoystick(cx, cy) {
+                    const dx = cx - joystickStart.x;
+                    const dy = cy - joystickStart.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist === 0) {
+                        joystickVector = { x: 0, y: 0 };
+                        joystickStick.style.transform = 'translate(0px, 0px)';
+                        return;
+                    }
+                    const angle = Math.atan2(dy, dx);
+                    const clampedDist = Math.min(dist, JOYSTICK_MAX_RADIUS);
+                    const stickX = Math.cos(angle) * clampedDist;
+                    const stickY = Math.sin(angle) * clampedDist;
+
+                    joystickStick.style.transform = `translate(${stickX}px, ${stickY}px)`;
+                    joystickVector = {
+                        x: stickX / JOYSTICK_MAX_RADIUS,
+                        y: stickY / JOYSTICK_MAX_RADIUS
+                    };
+                }
+            }
+
+            // 2. Action Buttons
+            if (mobileBtnJump) {
+                mobileBtnJump.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    if (isGrounded) {
+                        playerVelY = 8.5;
+                        isGrounded = false;
+                        playSound('jump');
+                    }
+                });
+            }
+
+            if (mobileBtnSprint) {
+                mobileBtnSprint.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    mobileSprintActive = !mobileSprintActive;
+                    mobileBtnSprint.classList.toggle('btn-active', mobileSprintActive);
+                });
+            }
+
+            if (mobileBtnInteract) {
+                mobileBtnInteract.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    handleInteract();
+                });
+            }
+
+            if (mobileBtnTarget) {
+                mobileBtnTarget.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    if (currentTarget) {
+                        clearTarget();
+                    } else {
+                        const aliveMobs = mobsList.filter(m => !m.is_dead);
+                        if (aliveMobs.length > 0) {
+                            let closest = null;
+                            let minDist = Infinity;
+                            aliveMobs.forEach(m => {
+                                const d = playerRoot.position.distanceTo(m.root.position);
+                                if (d < minDist) {
+                                    minDist = d;
+                                    closest = m;
+                                }
+                            });
+                            if (closest) setTarget(closest);
+                        }
+                    }
+                });
+            }
+
+            // 3. Touch Drag Camera & Pinch-to-Zoom
+            let camTouchId = null;
+            let camStartPos = { x: 0, y: 0 };
+            let camPrevPos = { x: 0, y: 0 };
+            let camStartTime = 0;
+            let initialPinchDist = null;
+
+            window.addEventListener('touchstart', e => {
+                initAudio();
+                if (e.touches.length === 2) {
+                    initialPinchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    return;
+                }
+
+                if (e.touches.length === 1 && camTouchId === null) {
+                    const touch = e.touches[0];
+                    const targetEl = e.target;
+                    if (targetEl.closest('#joystick-zone') || 
+                        targetEl.closest('#mobile-actions') || 
+                        targetEl.closest('.modal') || 
+                        targetEl.closest('#bottom-bar') || 
+                        targetEl.closest('#top-bar')) {
+                        return;
+                    }
+                    camTouchId = touch.identifier;
+                    camStartPos = { x: touch.clientX, y: touch.clientY };
+                    camPrevPos = { x: touch.clientX, y: touch.clientY };
+                    camStartTime = performance.now();
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchmove', e => {
+                if (e.touches.length === 2 && initialPinchDist !== null) {
+                    const currentDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const deltaDist = currentDist - initialPinchDist;
+                    camDist = Math.max(3.5, Math.min(16.0, camDist - deltaDist * 0.02));
+                    initialPinchDist = currentDist;
+                    return;
+                }
+
+                if (camTouchId !== null) {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const touch = e.changedTouches[i];
+                        if (touch.identifier === camTouchId) {
+                            const dx = touch.clientX - camPrevPos.x;
+                            const dy = touch.clientY - camPrevPos.y;
+                            camYaw -= dx * 0.007;
+                            camPitch = Math.max(-0.5, Math.min(0.8, camPitch - dy * 0.007));
+                            camPrevPos = { x: touch.clientX, y: touch.clientY };
+                            break;
+                        }
+                    }
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchend', e => {
+                if (e.touches.length < 2) initialPinchDist = null;
+                if (camTouchId !== null) {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const touch = e.changedTouches[i];
+                        if (touch.identifier === camTouchId) {
+                            const totalDist = Math.hypot(touch.clientX - camStartPos.x, touch.clientY - camStartPos.y);
+                            const duration = performance.now() - camStartTime;
+                            if (totalDist < 12 && duration < 320) {
+                                raycastSelect(touch.clientX, touch.clientY);
+                            }
+                            camTouchId = null;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Tap direto no prompt de interação
+            const pEl = document.getElementById('interact-prompt');
+            if (pEl) {
+                pEl.addEventListener('click', () => { initAudio(); handleInteract(); });
+                pEl.addEventListener('touchstart', e => { e.preventDefault(); initAudio(); handleInteract(); });
+            }
+        }
+        setupMobileControls();
 
         window.addEventListener('keydown', e => {
             initAudio();
@@ -1379,21 +1823,26 @@
                 c.position.y = 2.2 + Math.sin(now * 0.003) * 0.12;
             });
 
-            // 1. SPRINT MECHANIC: Shift key detection
-            isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
+            // 1. SPRINT MECHANIC: Shift key detection ou Mobile Sprint
+            isSprinting = keys['ShiftLeft'] || keys['ShiftRight'] || mobileSprintActive;
             sprintDot.className = isSprinting ? 'active' : '';
             sprintLabel.innerText = isSprinting ? 'ATIVADO (2x Velocidade)' : 'Desativado [SHIFT]';
             sprintLabel.style.color = isSprinting ? '#2ecc71' : '#fff';
 
             const moveSpeed = isSprinting ? 24.0 : 12.0;
 
-            // 2. PLAYER MOVEMENT
+            // 2. PLAYER MOVEMENT (Teclado + Virtual Joystick Mobile)
             let moveX = 0;
             let moveZ = 0;
             if (keys['KeyW'] || keys['ArrowUp']) moveZ -= 1;
             if (keys['KeyS'] || keys['ArrowDown']) moveZ += 1;
             if (keys['KeyA'] || keys['ArrowLeft']) moveX -= 1;
             if (keys['KeyD'] || keys['ArrowRight']) moveX += 1;
+
+            if (Math.abs(joystickVector.x) > 0.05 || Math.abs(joystickVector.y) > 0.05) {
+                moveX += joystickVector.x;
+                moveZ += joystickVector.y;
+            }
 
             const len = Math.hypot(moveX, moveZ);
             if (len > 0.001) {
@@ -1599,6 +2048,13 @@
                 }
             }
             activeInteract = found;
+            if (mobileBtnInteract) {
+                if (activeInteract) {
+                    mobileBtnInteract.classList.add('btn-highlight');
+                } else {
+                    mobileBtnInteract.classList.remove('btn-highlight');
+                }
+            }
             if (activeInteract) {
                 promptEl.style.display = 'block';
                 if (activeInteract.type === 'capsule') {
