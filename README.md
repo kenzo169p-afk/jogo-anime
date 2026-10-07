@@ -22,6 +22,21 @@ Projeto completo desenvolvido em **Godot Engine 4.x** (GDScript) com renderizado
 | **Equipar Melhores** | Botão HUD / Inventário | Equipa automaticamente os 3 maiores DPS |
 | **Salvar Jogo** | Botão HUD | Salva moedas, ilhas, passivas e pets em `user://savegame.json` |
 
+### 📱 Controles Mobile / Touch (Smartphones & Tablets)
+
+| Ação | Controle Touch | Descrição |
+|---|---|---|
+| **Mover Jogador** | Joystick Virtual Dinâmico | Toque e arraste no quadrante inferior esquerdo (centraliza sob o polegar) |
+| **Girar Câmera** | Arrastar na Tela | Arraste o polegar direito na tela (funciona simultaneamente enquanto anda) |
+| **Zoom da Câmera** | Pinça (Pinch to Zoom) | Gesto de pinça com 2 dedos para aproximar ou afastar a visão |
+| **Centralizar Câmera** | Botão `[🔄 Câmera]` | Recentraliza a visão orbital imediatamente atrás do personagem com 1 toque |
+| **Auto-Farm / Auto-Alvo** | Botão `[⚔️ Auto]` | Mira e caça inimigos automaticamente em sequência ao derrotar o anterior |
+| **Selecionar Alvo** | Toque no Mob / Botão `[🎯 Alvo]` | Toque na tela (com tolerância de toque ampliada) ou foque o mais próximo |
+| **Interagir** | Botão `[💬 Ação]` ou Prompt | Abre cápsula de gacha, máquina de passivas ou entra no portal |
+| **Correr / Sprint** | Botão `[⚡ Sprint]` | Alterna corrida rápida (2x velocidade) com indicador visual verde neon |
+| **Pular** | Botão `[🦘 Pular]` | Pulo com física e feedback tátil/sonoro |
+| **Menu Rápido Superior** | Ícones no Cabeçalho | Acesso instantâneo a Inventário (🎒), Ilhas (🗺️), Passivas (⚙️), Melhores (⭐), Salvar (💾) e Tela Cheia (⛶) |
+
 ---
 
 ## 🗺️ Tabela de Balanceamento das 10 Ilhas de Anime

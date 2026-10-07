@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1e29">
     <title>Anime Fighters Simulator - Demo Jogável (Godot 4.x Clone)</title>
     <style>
         * {
@@ -39,26 +43,31 @@
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(15, 18, 26, 0.88);
+            background: rgba(15, 18, 26, 0.9);
             border: 2px solid #2e4164;
-            border-radius: 10px;
-            padding: 10px 24px;
+            border-radius: 12px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+        }
+        #top-info-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
-            z-index: 10;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
+            gap: 2px;
         }
         #island-title {
-            font-size: 19px;
+            font-size: 18px;
             font-weight: bold;
             color: #ffcc00;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         #currency-text {
-            font-size: 16px;
+            font-size: 15px;
             color: #55d6ff;
             font-weight: 600;
         }
@@ -66,11 +75,74 @@
             font-size: 13px;
             color: #e070ff;
         }
+        #top-mobile-nav {
+            display: none;
+            gap: 6px;
+            align-items: center;
+        }
+        .nav-btn {
+            background: rgba(28, 38, 55, 0.92);
+            border: 1px solid #3d5375;
+            color: #fff;
+            padding: 7px 11px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+            touch-action: manipulation;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .nav-btn:active {
+            transform: scale(0.92);
+            background: #2e4164;
+        }
+        .nav-btn-green {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        .nav-btn-yellow {
+            border-color: #f1c40f;
+            color: #f1c40f;
+        }
+
+        /* ORIENTATION HINT */
+        #orientation-hint {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(26, 42, 68, 0.95);
+            border: 1px solid #55d6ff;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 11px;
+            color: #55d6ff;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 25;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            backdrop-filter: blur(6px);
+        }
+        #orient-hint-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 0 2px;
+            line-height: 1;
+        }
 
         /* TARGET PANEL */
         #target-panel {
             position: absolute;
-            top: 105px;
+            top: 100px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(20, 24, 34, 0.92);
@@ -82,12 +154,31 @@
             display: none;
             z-index: 10;
             box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            backdrop-filter: blur(4px);
+        }
+        #target-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
         }
         #target-name {
             font-size: 15px;
             font-weight: bold;
             color: #ff6b6b;
-            margin-bottom: 4px;
+            flex: 1;
+        }
+        #target-close-btn {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            border-radius: 4px;
+            color: #ff6b6b;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 7px;
+            line-height: 20px;
+            margin-left: 8px;
         }
         .hp-bar-bg {
             width: 100%;
@@ -454,31 +545,35 @@
 
         #joystick-zone {
             position: absolute;
-            bottom: 24px;
-            left: 24px;
-            width: 136px;
-            height: 136px;
+            bottom: 0;
+            left: 0;
+            width: 45vw;
+            height: 55vh;
             pointer-events: auto;
             touch-action: none;
         }
 
         #joystick-base {
-            width: 100%;
-            height: 100%;
+            width: 124px;
+            height: 124px;
             border-radius: 50%;
             background: rgba(18, 26, 42, 0.65);
             border: 2px solid rgba(85, 214, 255, 0.45);
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 0 14px rgba(85, 214, 255, 0.2);
-            position: relative;
+            position: absolute;
+            left: 26px;
+            bottom: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(5px);
+            pointer-events: none;
+            transition: opacity 0.2s ease;
         }
 
         #joystick-stick {
-            width: 54px;
-            height: 54px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: radial-gradient(circle, #55d6ff 0%, #1f5f99 100%);
             border: 2px solid #ffffff;
@@ -491,19 +586,19 @@
 
         #mobile-actions {
             position: absolute;
-            bottom: 24px;
-            right: 24px;
+            bottom: 20px;
+            right: 20px;
             display: grid;
-            grid-template-columns: repeat(2, 60px);
-            grid-gap: 12px;
+            grid-template-columns: repeat(3, 56px);
+            grid-gap: 10px;
             pointer-events: auto;
         }
 
         .mobile-btn {
-            width: 60px;
-            height: 60px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background: rgba(22, 30, 46, 0.88);
+            background: rgba(22, 30, 46, 0.9);
             border: 2px solid #3d5375;
             color: #fff;
             display: flex;
@@ -520,21 +615,21 @@
         }
 
         .mobile-btn:active {
-            transform: scale(0.92);
+            transform: scale(0.90);
             background: #2e4164;
         }
 
         .mobile-btn .m-icon {
-            font-size: 20px;
+            font-size: 19px;
             line-height: 1;
         }
 
         .mobile-btn .m-txt {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
             margin-top: 2px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
         .mobile-btn.btn-active {
@@ -554,39 +649,48 @@
             to { box-shadow: 0 0 16px rgba(241, 196, 15, 0.95); transform: scale(1.06); }
         }
 
-        /* RESPONSIVIDADE MOBILE */
+        /* RESPONSIVIDADE MOBILE COMPLETA */
         @media (max-width: 850px), (pointer: coarse) {
             #top-bar {
                 top: 6px;
-                padding: 6px 12px;
-                gap: 2px;
-                min-width: 190px;
+                left: 6px;
+                right: 6px;
+                transform: none;
+                width: auto;
+                padding: 6px 10px;
+                justify-content: space-between;
+                gap: 6px;
             }
-            #island-title { font-size: 13px; }
-            #currency-text { font-size: 12px; }
+            #top-info-group {
+                align-items: flex-start;
+                gap: 1px;
+            }
+            #island-title { font-size: 12px; }
+            #currency-text { font-size: 11px; }
             #team-dps-text { font-size: 10px; }
 
-            #target-panel {
-                top: 68px;
-                padding: 5px 10px;
-                min-width: 180px;
+            #top-mobile-nav {
+                display: flex;
             }
-            #target-name { font-size: 13px; }
+            .nav-btn span {
+                display: none;
+            }
+            .nav-btn {
+                padding: 5px 8px;
+                font-size: 14px;
+            }
 
             #bottom-bar {
-                bottom: auto;
-                top: 6px;
-                left: auto;
-                right: 8px;
-                transform: none;
-                flex-direction: column;
-                gap: 4px;
+                display: none !important;
             }
-            #bottom-bar .btn {
-                padding: 4px 8px;
-                font-size: 10px;
-                border-radius: 6px;
+
+            #target-panel {
+                top: 56px;
+                padding: 4px 10px;
+                min-width: 170px;
+                max-width: 240px;
             }
+            #target-name { font-size: 12px; }
 
             #sprint-badge {
                 display: none !important;
@@ -597,8 +701,12 @@
             }
 
             #interact-prompt {
+                top: auto;
+                bottom: 155px;
+                left: 50%;
+                transform: translateX(-50%);
                 font-size: 12px;
-                padding: 10px 16px;
+                padding: 9px 16px;
                 cursor: pointer;
                 pointer-events: auto;
             }
@@ -606,15 +714,102 @@
             .modal {
                 width: 95vw !important;
                 max-width: 95vw !important;
-                height: 86vh !important;
-                max-height: 86vh !important;
+                height: 88vh !important;
+                max-height: 88vh !important;
                 padding: 12px;
             }
             .modal-title { font-size: 14px; }
+            .modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+
+            /* PASSIVE MODAL ADAPTATION */
+            #modal-passive {
+                height: 90vh !important;
+            }
+            #modal-passive .modal-content {
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .passive-layout {
+                flex-direction: column !important;
+                height: auto !important;
+                gap: 12px !important;
+            }
+            .passive-list-col {
+                max-height: 150px !important;
+                border-right: none !important;
+                border-bottom: 1px solid #2d3b52 !important;
+                padding-bottom: 10px !important;
+                padding-right: 0 !important;
+            }
+            .passive-fighter-item {
+                padding: 8px 10px !important;
+            }
+            .passive-details-col {
+                flex: none !important;
+                gap: 10px !important;
+            }
+            .passive-odds-box {
+                font-size: 11px !important;
+                padding: 8px 10px !important;
+            }
+            #btn-roll-passive {
+                padding: 12px !important;
+                font-size: 14px !important;
+            }
 
             .inv-grid {
-                grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
-                gap: 6px;
+                grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)) !important;
+                gap: 6px !important;
+            }
+            .fighter-card {
+                padding: 8px !important;
+            }
+            .card-btn {
+                padding: 8px !important;
+                font-size: 12px !important;
+            }
+
+            .island-row {
+                padding: 10px 12px !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px !important;
+            }
+            .island-row > div:last-child {
+                width: 100% !important;
+            }
+            .island-row button {
+                width: 100% !important;
+                padding: 8px 12px !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #mobile-actions {
+                grid-template-columns: repeat(3, 48px);
+                grid-gap: 8px;
+                bottom: 14px;
+                right: 14px;
+            }
+            .mobile-btn {
+                width: 48px;
+                height: 48px;
+            }
+            .mobile-btn .m-icon {
+                font-size: 16px;
+            }
+            .mobile-btn .m-txt {
+                font-size: 7.5px;
+            }
+        }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            #orientation-hint {
+                display: flex;
             }
         }
     </style>
@@ -633,17 +828,25 @@
             </div>
         </div>
 
-        <!-- RIGHT ACTION BUTTONS -->
+        <!-- RIGHT ACTION BUTTONS (6 ERGONOMIC CONTROLS) -->
         <div id="mobile-actions">
-            <button id="mobile-btn-target" class="mobile-btn" type="button" title="Focar / Desmarcar Inimigo">
+            <button id="mobile-btn-camera" class="mobile-btn" type="button" title="Centralizar Câmera">
+                <span class="m-icon">🔄</span>
+                <span class="m-txt">Câmera</span>
+            </button>
+            <button id="mobile-btn-auto" class="mobile-btn" type="button" title="Auto-Farm (Mirar Próximo)">
+                <span class="m-icon">⚔️</span>
+                <span class="m-txt">Auto</span>
+            </button>
+            <button id="mobile-btn-target" class="mobile-btn" type="button" title="Focar / Desmarcar Alvo">
                 <span class="m-icon">🎯</span>
                 <span class="m-txt">Alvo</span>
             </button>
-            <button id="mobile-btn-interact" class="mobile-btn" type="button" title="Interagir">
+            <button id="mobile-btn-interact" class="mobile-btn" type="button" title="Interagir com Estação">
                 <span class="m-icon">💬</span>
-                <span class="m-txt">[E] Ação</span>
+                <span class="m-txt">Ação</span>
             </button>
-            <button id="mobile-btn-sprint" class="mobile-btn" type="button" title="Ativar Corrida">
+            <button id="mobile-btn-sprint" class="mobile-btn" type="button" title="Alternar Corrida Rápida">
                 <span class="m-icon">⚡</span>
                 <span class="m-txt">Sprint</span>
             </button>
@@ -654,16 +857,35 @@
         </div>
     </div>
 
-    <!-- TOP HUD -->
+    <!-- ORIENTATION HINT (Mobile Portrait) -->
+    <div id="orientation-hint">
+        <span>🔄 Gire o celular na horizontal para melhor visão!</span>
+        <button id="orient-hint-close">&times;</button>
+    </div>
+
+    <!-- TOP HUD & QUICK NAV -->
     <div id="top-bar">
-        <div id="island-title">Ilha 1: Vila da Folha (Naruto)</div>
-        <div id="currency-text">Ienes Ninja: 100</div>
-        <div id="team-dps-text">DPS da Equipe: 25 (1/3)</div>
+        <div id="top-info-group">
+            <div id="island-title">Ilha 1: Vila da Folha (Naruto)</div>
+            <div id="currency-text">Ienes Ninja: 100</div>
+            <div id="team-dps-text">DPS da Equipe: 25 (1/3)</div>
+        </div>
+        <div id="top-mobile-nav">
+            <button class="nav-btn" id="m-btn-inv" title="Inventário">🎒 <span>Inv</span></button>
+            <button class="nav-btn" id="m-btn-islands" title="Ilhas">🗺️ <span>Ilhas</span></button>
+            <button class="nav-btn nav-btn-yellow" id="m-btn-passives" title="Passivas">⚙️ <span>Passivas</span></button>
+            <button class="nav-btn nav-btn-green" id="m-btn-equip" title="Equipar Melhores">⭐ <span>Melhores</span></button>
+            <button class="nav-btn" id="m-btn-save" title="Salvar Jogo">💾 <span>Salvar</span></button>
+            <button class="nav-btn" id="m-btn-fs" title="Tela Cheia">⛶</button>
+        </div>
     </div>
 
     <!-- TARGET MOB BAR -->
     <div id="target-panel">
-        <div id="target-name">Ninja Renegado</div>
+        <div id="target-header">
+            <div id="target-name">Ninja Renegado</div>
+            <button id="target-close-btn" type="button" title="Desmarcar Alvo">&times;</button>
+        </div>
         <div class="hp-bar-bg">
             <div id="target-hp-fill"></div>
             <div id="target-hp-num">100 / 100</div>
@@ -728,7 +950,7 @@
             <div class="modal-title" id="passive-modal-title">MÁQUINA DE PASSIVAS</div>
             <button class="modal-close" id="modal-close-passive">&times;</button>
         </div>
-        <div class="modal-content" style="overflow: hidden;">
+        <div class="modal-content">
             <div class="passive-layout">
                 <div class="passive-list-col" id="passive-fighters-container"></div>
                 <div class="passive-details-col">
@@ -1450,10 +1672,12 @@
 
         /* MOBILE CONTROLS STATE */
         let mobileSprintActive = false;
+        let autoTargetMode = false;
         let joystickVector = { x: 0, y: 0 };
         let joystickTouchId = null;
         let joystickStart = { x: 0, y: 0 };
-        const JOYSTICK_MAX_RADIUS = 38;
+        const JOYSTICK_MAX_RADIUS = 42;
+        let lastTouchEndTime = 0;
 
         const mobileControlsContainer = document.getElementById('mobile-controls-container');
         const joystickBase = document.getElementById('joystick-base');
@@ -1463,18 +1687,80 @@
         const mobileBtnSprint = document.getElementById('mobile-btn-sprint');
         const mobileBtnInteract = document.getElementById('mobile-btn-interact');
         const mobileBtnTarget = document.getElementById('mobile-btn-target');
+        const mobileBtnAuto = document.getElementById('mobile-btn-auto');
+        const mobileBtnCamera = document.getElementById('mobile-btn-camera');
+
+        function isMobileOrTouch() {
+            return ('ontouchstart' in window) || 
+                   (navigator.maxTouchPoints > 0) || 
+                   window.matchMedia("(pointer: coarse)").matches || 
+                   window.innerWidth <= 1024;
+        }
+
+        function findAndSetNearestMob() {
+            const aliveMobs = mobsList.filter(m => !m.is_dead && m.island_id === state.current_island);
+            if (aliveMobs.length > 0) {
+                let closest = null;
+                let minDist = Infinity;
+                aliveMobs.forEach(m => {
+                    const d = playerRoot.position.distanceTo(m.root.position);
+                    if (d < minDist) {
+                        minDist = d;
+                        closest = m;
+                    }
+                });
+                if (closest) setTarget(closest);
+                else clearTarget();
+            } else {
+                clearTarget();
+            }
+        }
+
+        function toggleAutoTarget() {
+            autoTargetMode = !autoTargetMode;
+            if (mobileBtnAuto) mobileBtnAuto.classList.toggle('btn-active', autoTargetMode);
+            if (autoTargetMode) {
+                showNotification("⚔️ Auto-Farm ATIVADO! (Mirando inimigos)", "#2ecc71");
+                if (!currentTarget || currentTarget.is_dead) findAndSetNearestMob();
+            } else {
+                showNotification("Auto-Farm Desativado", "#bdc3c7");
+            }
+            if (navigator.vibrate) navigator.vibrate(15);
+        }
+
+        function resetCamera() {
+            camYaw = playerRoot.rotation.y + Math.PI;
+            camPitch = 0.25;
+            camDist = 8.0;
+            if (navigator.vibrate) navigator.vibrate(10);
+            showNotification("Câmera centralizada!", "#55d6ff");
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+                else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            }
+        }
 
         function setupMobileControls() {
-            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 850;
-            if (isTouch && mobileControlsContainer) {
+            if (isMobileOrTouch() && mobileControlsContainer) {
                 mobileControlsContainer.style.display = 'block';
             }
 
-            // Desbloqueio global de áudio no primeiro toque
-            window.addEventListener('touchstart', () => { initAudio(); }, { passive: true, once: true });
-            window.addEventListener('touchend', () => { initAudio(); }, { passive: true, once: true });
+            // Desbloqueio global de áudio no primeiro toque e ativação dos controles
+            ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(evt => {
+                window.addEventListener(evt, () => {
+                    initAudio();
+                    if (mobileControlsContainer) mobileControlsContainer.style.display = 'block';
+                }, { passive: true, once: true });
+            });
 
-            // 1. Virtual Joystick
+            // 1. Virtual Joystick Dinâmico
             if (joystickZone) {
                 joystickZone.addEventListener('touchstart', e => {
                     e.preventDefault();
@@ -1482,11 +1768,19 @@
                     if (joystickTouchId !== null) return;
                     const touch = e.changedTouches[0];
                     joystickTouchId = touch.identifier;
-                    const rect = joystickBase.getBoundingClientRect();
-                    joystickStart = {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2
-                    };
+
+                    const zoneRect = joystickZone.getBoundingClientRect();
+                    const localX = touch.clientX - zoneRect.left;
+                    const localY = touch.clientY - zoneRect.top;
+
+                    if (joystickBase) {
+                        joystickBase.style.left = (localX - 62) + 'px';
+                        joystickBase.style.top = (localY - 62) + 'px';
+                        joystickBase.style.bottom = 'auto';
+                        joystickBase.style.opacity = '1.0';
+                    }
+
+                    joystickStart = { x: touch.clientX, y: touch.clientY };
                     updateJoystick(touch.clientX, touch.clientY);
                 }, { passive: false });
 
@@ -1505,6 +1799,12 @@
                     joystickTouchId = null;
                     joystickVector = { x: 0, y: 0 };
                     if (joystickStick) joystickStick.style.transform = 'translate(0px, 0px)';
+                    if (joystickBase) {
+                        joystickBase.style.left = '26px';
+                        joystickBase.style.bottom = '26px';
+                        joystickBase.style.top = 'auto';
+                        joystickBase.style.opacity = '0.65';
+                    }
                 }
 
                 window.addEventListener('touchend', e => {
@@ -1522,9 +1822,9 @@
                     const dx = cx - joystickStart.x;
                     const dy = cy - joystickStart.y;
                     const dist = Math.hypot(dx, dy);
-                    if (dist === 0) {
+                    if (dist < 4) {
                         joystickVector = { x: 0, y: 0 };
-                        joystickStick.style.transform = 'translate(0px, 0px)';
+                        if (joystickStick) joystickStick.style.transform = 'translate(0px, 0px)';
                         return;
                     }
                     const angle = Math.atan2(dy, dx);
@@ -1532,7 +1832,7 @@
                     const stickX = Math.cos(angle) * clampedDist;
                     const stickY = Math.sin(angle) * clampedDist;
 
-                    joystickStick.style.transform = `translate(${stickX}px, ${stickY}px)`;
+                    if (joystickStick) joystickStick.style.transform = `translate(${stickX}px, ${stickY}px)`;
                     joystickVector = {
                         x: stickX / JOYSTICK_MAX_RADIUS,
                         y: stickY / JOYSTICK_MAX_RADIUS
@@ -1540,7 +1840,7 @@
                 }
             }
 
-            // 2. Action Buttons
+            // 2. Botões de Ação Mobile
             if (mobileBtnJump) {
                 mobileBtnJump.addEventListener('touchstart', e => {
                     e.preventDefault();
@@ -1549,8 +1849,9 @@
                         playerVelY = 8.5;
                         isGrounded = false;
                         playSound('jump');
+                        if (navigator.vibrate) navigator.vibrate(12);
                     }
-                });
+                }, { passive: false });
             }
 
             if (mobileBtnSprint) {
@@ -1559,7 +1860,8 @@
                     initAudio();
                     mobileSprintActive = !mobileSprintActive;
                     mobileBtnSprint.classList.toggle('btn-active', mobileSprintActive);
-                });
+                    if (navigator.vibrate) navigator.vibrate(15);
+                }, { passive: false });
             }
 
             if (mobileBtnInteract) {
@@ -1567,7 +1869,8 @@
                     e.preventDefault();
                     initAudio();
                     handleInteract();
-                });
+                    if (navigator.vibrate) navigator.vibrate(20);
+                }, { passive: false });
             }
 
             if (mobileBtnTarget) {
@@ -1577,24 +1880,29 @@
                     if (currentTarget) {
                         clearTarget();
                     } else {
-                        const aliveMobs = mobsList.filter(m => !m.is_dead);
-                        if (aliveMobs.length > 0) {
-                            let closest = null;
-                            let minDist = Infinity;
-                            aliveMobs.forEach(m => {
-                                const d = playerRoot.position.distanceTo(m.root.position);
-                                if (d < minDist) {
-                                    minDist = d;
-                                    closest = m;
-                                }
-                            });
-                            if (closest) setTarget(closest);
-                        }
+                        findAndSetNearestMob();
                     }
-                });
+                    if (navigator.vibrate) navigator.vibrate(15);
+                }, { passive: false });
             }
 
-            // 3. Touch Drag Camera & Pinch-to-Zoom
+            if (mobileBtnAuto) {
+                mobileBtnAuto.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    toggleAutoTarget();
+                }, { passive: false });
+            }
+
+            if (mobileBtnCamera) {
+                mobileBtnCamera.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    resetCamera();
+                }, { passive: false });
+            }
+
+            // 3. Rotação Orbital da Câmera (Multi-Touch isolado) e Pinch-to-Zoom
             let camTouchId = null;
             let camStartPos = { x: 0, y: 0 };
             let camPrevPos = { x: 0, y: 0 };
@@ -1603,36 +1911,67 @@
 
             window.addEventListener('touchstart', e => {
                 initAudio();
-                if (e.touches.length === 2) {
+
+                // Verifica pinça com 2 dedos fora da área do joystick
+                const cameraTouches = [];
+                for (let i = 0; i < e.touches.length; i++) {
+                    const t = e.touches[i];
+                    if (t.identifier !== joystickTouchId) {
+                        const el = document.elementFromPoint(t.clientX, t.clientY);
+                        if (!el || (!el.closest('#mobile-actions') && !el.closest('.modal') && !el.closest('#top-bar') && !el.closest('#bottom-bar'))) {
+                            cameraTouches.push(t);
+                        }
+                    }
+                }
+
+                if (cameraTouches.length >= 2) {
                     initialPinchDist = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
+                        cameraTouches[0].clientX - cameraTouches[1].clientX,
+                        cameraTouches[0].clientY - cameraTouches[1].clientY
                     );
+                    camTouchId = null;
                     return;
                 }
 
-                if (e.touches.length === 1 && camTouchId === null) {
-                    const touch = e.touches[0];
-                    const targetEl = e.target;
-                    if (targetEl.closest('#joystick-zone') || 
-                        targetEl.closest('#mobile-actions') || 
-                        targetEl.closest('.modal') || 
-                        targetEl.closest('#bottom-bar') || 
-                        targetEl.closest('#top-bar')) {
-                        return;
+                // Toque único para rotação de câmera ou seleção por toque
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const t = e.changedTouches[i];
+                    if (t.identifier === joystickTouchId) continue;
+                    const el = document.elementFromPoint(t.clientX, t.clientY);
+                    if (el && (el.closest('#joystick-zone') || 
+                        el.closest('#mobile-actions') || 
+                        el.closest('.modal') || 
+                        el.closest('#top-bar') || 
+                        el.closest('#bottom-bar') ||
+                        el.closest('#interact-prompt') ||
+                        el.closest('#orientation-hint'))) {
+                        continue;
                     }
-                    camTouchId = touch.identifier;
-                    camStartPos = { x: touch.clientX, y: touch.clientY };
-                    camPrevPos = { x: touch.clientX, y: touch.clientY };
-                    camStartTime = performance.now();
+
+                    if (camTouchId === null) {
+                        camTouchId = t.identifier;
+                        camStartPos = { x: t.clientX, y: t.clientY };
+                        camPrevPos = { x: t.clientX, y: t.clientY };
+                        camStartTime = performance.now();
+                        break;
+                    }
                 }
             }, { passive: false });
 
             window.addEventListener('touchmove', e => {
-                if (e.touches.length === 2 && initialPinchDist !== null) {
+                // Pinch to Zoom
+                const cameraTouches = [];
+                for (let i = 0; i < e.touches.length; i++) {
+                    const t = e.touches[i];
+                    if (t.identifier !== joystickTouchId) {
+                        cameraTouches.push(t);
+                    }
+                }
+
+                if (cameraTouches.length >= 2 && initialPinchDist !== null) {
                     const currentDist = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
+                        cameraTouches[0].clientX - cameraTouches[1].clientX,
+                        cameraTouches[0].clientY - cameraTouches[1].clientY
                     );
                     const deltaDist = currentDist - initialPinchDist;
                     camDist = Math.max(3.5, Math.min(16.0, camDist - deltaDist * 0.02));
@@ -1640,6 +1979,7 @@
                     return;
                 }
 
+                // Rotação orbital
                 if (camTouchId !== null) {
                     for (let i = 0; i < e.changedTouches.length; i++) {
                         const touch = e.changedTouches[i];
@@ -1656,14 +1996,16 @@
             }, { passive: false });
 
             window.addEventListener('touchend', e => {
+                lastTouchEndTime = performance.now();
                 if (e.touches.length < 2) initialPinchDist = null;
+
                 if (camTouchId !== null) {
                     for (let i = 0; i < e.changedTouches.length; i++) {
                         const touch = e.changedTouches[i];
                         if (touch.identifier === camTouchId) {
                             const totalDist = Math.hypot(touch.clientX - camStartPos.x, touch.clientY - camStartPos.y);
                             const duration = performance.now() - camStartTime;
-                            if (totalDist < 12 && duration < 320) {
+                            if (totalDist < 16 && duration < 350) {
                                 raycastSelect(touch.clientX, touch.clientY);
                             }
                             camTouchId = null;
@@ -1678,6 +2020,15 @@
             if (pEl) {
                 pEl.addEventListener('click', () => { initAudio(); handleInteract(); });
                 pEl.addEventListener('touchstart', e => { e.preventDefault(); initAudio(); handleInteract(); });
+            }
+
+            // Fechar dica de orientação
+            const orientClose = document.getElementById('orient-hint-close');
+            if (orientClose) {
+                orientClose.addEventListener('click', () => {
+                    const hint = document.getElementById('orientation-hint');
+                    if (hint) hint.style.display = 'none';
+                });
             }
         }
         setupMobileControls();
@@ -1702,12 +2053,12 @@
         });
 
         window.addEventListener('mousedown', e => {
+            if (performance.now() - lastTouchEndTime < 450) return;
             initAudio();
             if (e.button === 2) {
                 isRightMouseDown = true;
                 prevMousePos = { x: e.clientX, y: e.clientY };
             } else if (e.button === 0) {
-                // Raycast enemy selection
                 raycastSelect(e.clientX, e.clientY);
             }
         });
@@ -1732,7 +2083,7 @@
 
         window.addEventListener('contextmenu', e => e.preventDefault());
 
-        /* --- RAYCAST SELECT MOB --- */
+        /* --- RAYCAST SELECT MOB COM SUPORTE MOBILE --- */
         const raycaster = new THREE.Raycaster();
         const mouseVec = new THREE.Vector2();
 
@@ -1741,7 +2092,8 @@
             mouseVec.y = -(clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouseVec, camera);
 
-            const mobRoots = mobsList.filter(m => !m.is_dead).map(m => m.root);
+            const activeIslandMobs = mobsList.filter(m => !m.is_dead && m.island_id === state.current_island);
+            const mobRoots = activeIslandMobs.map(m => m.root);
             const intersects = raycaster.intersectObjects(mobRoots, true);
 
             if (intersects.length > 0) {
@@ -1749,13 +2101,43 @@
                 while (hitMobRoot.parent && hitMobRoot.parent !== scene) {
                     hitMobRoot = hitMobRoot.parent;
                 }
-                const found = mobsList.find(m => m.root === hitMobRoot);
+                const found = activeIslandMobs.find(m => m.root === hitMobRoot);
                 if (found) {
                     if (currentTarget === found) {
                         clearTarget();
                     } else {
                         setTarget(found);
+                        if (navigator.vibrate) navigator.vibrate(15);
                     }
+                    return;
+                }
+            }
+
+            // Proximidade na tela para toque touch (tolerância de 55px)
+            let closestMob = null;
+            let minScreenDist = 55;
+            const tempV = new THREE.Vector3();
+            activeIslandMobs.forEach(m => {
+                m.root.getWorldPosition(tempV);
+                tempV.y += m.is_boss ? 1.6 : 0.8;
+                tempV.project(camera);
+                if (tempV.z > 0 && tempV.z < 1) {
+                    const sx = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                    const sy = (-(tempV.y * 0.5) + 0.5) * window.innerHeight;
+                    const dist = Math.hypot(clientX - sx, clientY - sy);
+                    if (dist < minScreenDist) {
+                        minScreenDist = dist;
+                        closestMob = m;
+                    }
+                }
+            });
+
+            if (closestMob) {
+                if (currentTarget === closestMob) {
+                    clearTarget();
+                } else {
+                    setTarget(closestMob);
+                    if (navigator.vibrate) navigator.vibrate(15);
                 }
             }
         }
@@ -1767,6 +2149,7 @@
             document.getElementById('target-panel').style.display = 'block';
             document.getElementById('target-name').innerText = (mob.is_boss ? "[CHEFE] " : "") + mob.name;
             document.getElementById('target-name').style.color = mob.is_boss ? "#ff2a55" : "#ff6b6b";
+            if (mobileBtnTarget) mobileBtnTarget.classList.add('btn-active');
             updateTargetUI();
         }
 
@@ -1774,6 +2157,7 @@
             if (currentTarget) currentTarget.ring.visible = false;
             currentTarget = null;
             document.getElementById('target-panel').style.display = 'none';
+            if (mobileBtnTarget) mobileBtnTarget.classList.remove('btn-active');
         }
 
         function updateTargetUI() {
@@ -1973,6 +2357,11 @@
             // 6. CHECK INTERACTION PROXIMITY
             checkInteractionProximity();
 
+            // Auto-Farm Mob Hunter Loop
+            if (autoTargetMode && (!currentTarget || currentTarget.is_dead)) {
+                findAndSetNearestMob();
+            }
+
             renderer.render(scene, camera);
         }
 
@@ -2029,7 +2418,13 @@
             }
 
             updateHUD();
-            if (currentTarget === mob) clearTarget();
+            if (currentTarget === mob) {
+                if (autoTargetMode) {
+                    findAndSetNearestMob();
+                } else {
+                    clearTarget();
+                }
+            }
         }
 
         /* --- INTERACTION PROMPT (Capsule, Portal, Passive Machine) --- */
@@ -2415,7 +2810,7 @@
             }
         };
 
-        // Attach UI Buttons
+        // Attach UI Buttons (Desktop & Modals)
         document.getElementById('btn-inventory').onclick = () => toggleModal('modal-inventory');
         document.getElementById('btn-islands').onclick = () => toggleModal('modal-islands');
         document.getElementById('btn-passives').onclick = () => openPassiveModal(state.current_island);
@@ -2423,6 +2818,28 @@
         document.getElementById('modal-btn-equip-best').onclick = equipBest;
         document.getElementById('btn-save').onclick = saveGame;
         document.getElementById('btn-roll-passive').onclick = doRerollPassive;
+
+        // Mobile Top Quick Nav Buttons
+        const mBtnInv = document.getElementById('m-btn-inv');
+        if (mBtnInv) mBtnInv.onclick = () => toggleModal('modal-inventory');
+
+        const mBtnIslands = document.getElementById('m-btn-islands');
+        if (mBtnIslands) mBtnIslands.onclick = () => toggleModal('modal-islands');
+
+        const mBtnPassives = document.getElementById('m-btn-passives');
+        if (mBtnPassives) mBtnPassives.onclick = () => openPassiveModal(state.current_island);
+
+        const mBtnEquip = document.getElementById('m-btn-equip');
+        if (mBtnEquip) mBtnEquip.onclick = equipBest;
+
+        const mBtnSave = document.getElementById('m-btn-save');
+        if (mBtnSave) mBtnSave.onclick = saveGame;
+
+        const mBtnFs = document.getElementById('m-btn-fs');
+        if (mBtnFs) mBtnFs.onclick = toggleFullscreen;
+
+        const targetCloseBtn = document.getElementById('target-close-btn');
+        if (targetCloseBtn) targetCloseBtn.onclick = clearTarget;
 
         document.getElementById('modal-close-inv').onclick = () => toggleModal('modal-inventory');
         document.getElementById('modal-close-islands').onclick = () => toggleModal('modal-islands');
@@ -2432,6 +2849,17 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            if (isMobileOrTouch() && mobileControlsContainer) {
+                mobileControlsContainer.style.display = 'block';
+            }
+        });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }, 120);
         });
 
         // Initialize scene
