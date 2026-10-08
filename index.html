@@ -468,6 +468,246 @@
             color: #fff;
         }
 
+        /* CAPSULE BILLBOARD SCREEN (IN-GAME DISPLAY) */
+        #capsule-display-board {
+            display: none;
+            position: fixed;
+            bottom: 86px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 580px;
+            max-width: 95vw;
+            background: rgba(10, 16, 28, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid #f1c40f;
+            border-radius: 12px;
+            padding: 12px 14px;
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.85), 0 0 16px rgba(241, 196, 15, 0.25);
+            z-index: 999;
+            pointer-events: auto;
+            color: #fff;
+            user-select: none;
+        }
+        .capsule-board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        .capsule-board-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #f1c40f;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 8px rgba(241, 196, 15, 0.4);
+        }
+        .capsule-board-cost {
+            font-size: 12px;
+            color: #55d6ff;
+            font-weight: 700;
+        }
+        .capsule-pity-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .capsule-pity-box {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .pity-title-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+        .pity-count-bold {
+            color: #f1c40f;
+            font-weight: 800;
+        }
+        .pity-progress-bar {
+            width: 100%;
+            height: 7px;
+            background: #1e293b;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .pity-fill-leg {
+            background: linear-gradient(90deg, #f39c12, #f1c40f);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .pity-fill-myt {
+            background: linear-gradient(90deg, #e74c3c, #ff007f);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .pity-hint {
+            font-size: 9.5px;
+            color: #94a3b8;
+            text-align: right;
+            font-weight: 600;
+        }
+        .capsule-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .capsule-card {
+            background: #080c14;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            padding: 6px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            min-height: 115px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.15s ease;
+        }
+        .capsule-card:hover {
+            transform: translateY(-2px);
+        }
+        .capsule-card.secret-card {
+            border-color: #ff007f !important;
+            background: radial-gradient(circle at center, #23082b 0%, #080c14 85%) !important;
+            animation: secretGlow 2.5s infinite alternate ease-in-out;
+        }
+        @keyframes secretGlow {
+            0% { box-shadow: 0 0 6px rgba(255, 0, 127, 0.3); }
+            100% { box-shadow: 0 0 16px rgba(255, 0, 127, 0.7); }
+        }
+        .capsule-card-rarity {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .capsule-card-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 2px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .capsule-card-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .capsule-card-secret-avatar {
+            font-size: 24px;
+            color: #ff007f;
+            filter: drop-shadow(0 0 6px #ff007f);
+        }
+        .capsule-card-name {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #f1f5f9;
+            line-height: 1.2;
+            margin-bottom: 2px;
+            max-width: 95%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .capsule-card-dps {
+            font-size: 9.5px;
+            color: #f59e0b;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .capsule-card-chance {
+            font-size: 11px;
+            font-weight: 800;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 7px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* REGISTRY MODAL (1 RECORD PER RARITY) */
+        #modal-registry {
+            width: 780px;
+            max-width: 95vw;
+            height: 560px;
+            max-height: 90vh;
+        }
+        .registry-tabs-row {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            -webkit-overflow-scrolling: touch;
+        }
+        .registry-tab-btn {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .registry-tab-btn:hover {
+            background: #334155;
+            color: #fff;
+        }
+        .registry-tab-btn.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #60a5fa;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+        }
+        .registry-grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+        .registry-slot-card {
+            background: #0b111e;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: transform 0.15s ease;
+        }
+        .registry-slot-card:hover {
+            transform: translateY(-2px);
+        }
+        .registry-slot-card.locked {
+            opacity: 0.65;
+            background: #080c14;
+            border-style: dashed;
+        }
         /* PASSIVE MACHINE MODAL */
         #modal-passive {
             width: 760px;
@@ -940,6 +1180,7 @@
             <button class="nav-btn" id="m-btn-inv" title="Inventário">🎒 <span>Inv</span></button>
             <button class="nav-btn" id="m-btn-islands" title="Ilhas">🗺️ <span>Ilhas</span></button>
             <button class="nav-btn nav-btn-yellow" id="m-btn-passives" title="Passivas">⚙️ <span>Passivas</span></button>
+            <button class="nav-btn nav-btn-blue" id="m-btn-registry" style="background:rgba(41,128,185,0.25); border-color:#3498db; color:#55d6ff;" title="Cole&ccedil;&atilde;o de Personagens">&#128214; <span>Cole&ccedil;&atilde;o</span></button>
             <button class="nav-btn nav-btn-green" id="m-btn-equip" title="Equipar Melhores">⭐ <span>Melhores</span></button>
             <button class="nav-btn" id="m-btn-save" title="Salvar Jogo">💾 <span>Salvar</span></button>
             <button class="nav-btn" id="m-btn-fs" title="Tela Cheia">⛶</button>
@@ -958,6 +1199,9 @@
         </div>
     </div>
 
+    <!-- CAPSULE BILLBOARD SCREEN (IN-GAME PROBABILITY & PITY DISPLAY) -->
+    <div id="capsule-display-board"></div>
+
     <!-- PROMPT INTERACTION -->
     <div id="interact-prompt">[E] Abrir Cápsula (100 Ienes Ninja)</div>
 
@@ -969,6 +1213,7 @@
         <button class="btn" id="btn-inventory">Inventário [I]</button>
         <button class="btn" id="btn-islands">Ilhas [M]</button>
         <button class="btn btn-yellow" id="btn-passives">Passivas [P]</button>
+        <button class="btn btn-blue" id="btn-registry" style="background:#2980b9; border-color:#3498db; color:#fff;">Cole&ccedil;&atilde;o [R]</button>
         <button class="btn btn-green" id="btn-equip-best">Equipar Melhores</button>
         <button class="btn" id="btn-save">Salvar Jogo</button>
     </div>
@@ -1201,13 +1446,15 @@
         const RARITY_EPIC = "Épico";
         const RARITY_LEGENDARY = "Lendário";
         const RARITY_MYTHIC = "Mítico";
+        const RARITY_SECRET = "Secreto";
 
         const RARITY_COLORS = {
             [RARITY_COMMON]: "#bdc3c7",
             [RARITY_RARE]: "#3498db",
             [RARITY_EPIC]: "#9b59b6",
             [RARITY_LEGENDARY]: "#f1c40f",
-            [RARITY_MYTHIC]: "#e74c3c"
+            [RARITY_MYTHIC]: "#e74c3c",
+            [RARITY_SECRET]: "#ff007f"
         };
 
         const PASSIVES = {
@@ -1235,7 +1482,8 @@
                     [RARITY_RARE]: { name: "Sasuke Genin", dps: 65, color: 0x2980b9 },
                     [RARITY_EPIC]: { name: "Kakashi do Sharingan", dps: 160, color: 0x7f8c8d },
                     [RARITY_LEGENDARY]: { name: "Itachi Akatsuki", dps: 420, color: 0xc0392b },
-                    [RARITY_MYTHIC]: { name: "Naruto Modo Sábio", dps: 1250, color: 0xf1c40f }
+                    [RARITY_MYTHIC]: { name: "Naruto Modo Sábio", dps: 1250, color: 0xf1c40f },
+                    [RARITY_SECRET]: { name: "Madara Rikudou Supremo", dps: 3800, color: 0x8e44ad, secret: true }
                 }
             },
             2: {
@@ -1250,7 +1498,8 @@
                     [RARITY_RARE]: { name: "Ban da Ganância", dps: 320, color: 0xc0392b },
                     [RARITY_EPIC]: { name: "King Rei das Fadas", dps: 800, color: 0x27ae60 },
                     [RARITY_LEGENDARY]: { name: "Meliodas Fúria Dragão", dps: 2200, color: 0x8e44ad },
-                    [RARITY_MYTHIC]: { name: "Escanor O Todo-Poderoso", dps: 6500, color: 0xf39c12 }
+                    [RARITY_MYTHIC]: { name: "Escanor O Todo-Poderoso", dps: 6500, color: 0xf39c12 },
+                    [RARITY_SECRET]: { name: "Arthur Rei do Caos", dps: 19500, color: 0xe67e22, secret: true }
                 }
             },
             3: {
@@ -1265,7 +1514,8 @@
                     [RARITY_RARE]: { name: "Charizard Chamas", dps: 1750, color: 0xe67e22 },
                     [RARITY_EPIC]: { name: "Lucario da Aura", dps: 4400, color: 0x2980b9 },
                     [RARITY_LEGENDARY]: { name: "Mewtwo Psíquico", dps: 12000, color: 0x9b59b6 },
-                    [RARITY_MYTHIC]: { name: "Rayquaza Celestial", dps: 35000, color: 0x2ecc71 }
+                    [RARITY_MYTHIC]: { name: "Rayquaza Celestial", dps: 35000, color: 0x2ecc71 },
+                    [RARITY_SECRET]: { name: "Arceus Criador C\u00F3smico", dps: 105000, color: 0xffffff, secret: true }
                 }
             },
             4: {
@@ -1280,7 +1530,8 @@
                     [RARITY_RARE]: { name: "Sanji Perna Negra", dps: 8500, color: 0x2c3e50 },
                     [RARITY_EPIC]: { name: "Zoro Três Espadas", dps: 22000, color: 0x196f3d },
                     [RARITY_LEGENDARY]: { name: "Luffy Snakeman", dps: 58000, color: 0xe74c3c },
-                    [RARITY_MYTHIC]: { name: "Luffy Gear 5 Deus do Sol", dps: 170000, color: 0xffffff }
+                    [RARITY_MYTHIC]: { name: "Luffy Gear 5 Deus do Sol", dps: 170000, color: 0xffffff },
+                    [RARITY_SECRET]: { name: "Gol D. Roger Rei dos Piratas", dps: 510000, color: 0xc0392b, secret: true }
                 }
             },
             5: {
@@ -1295,7 +1546,8 @@
                     [RARITY_RARE]: { name: "Bakugo Explosão Total", dps: 45000, color: 0xd35400 },
                     [RARITY_EPIC]: { name: "Todoroki Fogo e Gelo", dps: 110000, color: 0x3498db },
                     [RARITY_LEGENDARY]: { name: "Endeavor Chamas", dps: 300000, color: 0xc0392b },
-                    [RARITY_MYTHIC]: { name: "All Might Símbolo Paz", dps: 900000, color: 0xf1c40f }
+                    [RARITY_MYTHIC]: { name: "All Might Símbolo Paz", dps: 900000, color: 0xf1c40f },
+                    [RARITY_SECRET]: { name: "Shigaraki Despertado", dps: 2700000, color: 0x2c3e50, secret: true }
                 }
             },
             6: {
@@ -1310,7 +1562,8 @@
                     [RARITY_RARE]: { name: "Chigiri Pantera", dps: 220000, color: 0xe91e63 },
                     [RARITY_EPIC]: { name: "Barou O Rei do Campo", dps: 550000, color: 0x880e4f },
                     [RARITY_LEGENDARY]: { name: "Nagi Gênio Domínio", dps: 1500000, color: 0xbdc3c7 },
-                    [RARITY_MYTHIC]: { name: "Isagi Metavisão Máxima", dps: 4500000, color: 0x00ff88 }
+                    [RARITY_MYTHIC]: { name: "Isagi Metavisão Máxima", dps: 4500000, color: 0x00ff88 },
+                    [RARITY_SECRET]: { name: "Sae Itoshi Maestro Global", dps: 13500000, color: 0x9b59b6, secret: true }
                 }
             },
             7: {
@@ -1325,7 +1578,8 @@
                     [RARITY_RARE]: { name: "Kimura Dragão Branco", dps: 1100000, color: 0x2980b9 },
                     [RARITY_EPIC]: { name: "Sendo Tigre de Naniwa", dps: 2800000, color: 0xd35400 },
                     [RARITY_LEGENDARY]: { name: "Takamura Campeão", dps: 7500000, color: 0xf1c40f },
-                    [RARITY_MYTHIC]: { name: "Ippo Dempsey Roll Supremo", dps: 22000000, color: 0x00d2d3 }
+                    [RARITY_MYTHIC]: { name: "Ippo Dempsey Roll Supremo", dps: 22000000, color: 0x00d2d3 },
+                    [RARITY_SECRET]: { name: "Vorg Zangief Presa Branca", dps: 66000000, color: 0xbdc3c7, secret: true }
                 }
             },
             8: {
@@ -1340,7 +1594,8 @@
                     [RARITY_RARE]: { name: "Vegeta Príncipe Saiyajin", dps: 6000000, color: 0x1f3a93 },
                     [RARITY_EPIC]: { name: "Trunks Espada Futuro", dps: 15000000, color: 0x4a235a },
                     [RARITY_LEGENDARY]: { name: "Gohan SSJ2 Relâmpago", dps: 40000000, color: 0xf7dc6f },
-                    [RARITY_MYTHIC]: { name: "Goku Super Saiyajin", dps: 120000000, color: 0xf39c12 }
+                    [RARITY_MYTHIC]: { name: "Goku Super Saiyajin", dps: 120000000, color: 0xf39c12 },
+                    [RARITY_SECRET]: { name: "Broly Lend\u00E1rio Saiyajin", dps: 360000000, color: 0x2ecc71, secret: true }
                 }
             },
             9: {
@@ -1355,7 +1610,8 @@
                     [RARITY_RARE]: { name: "Josuke & Crazy Diamond", dps: 35000000, color: 0xff6b81 },
                     [RARITY_EPIC]: { name: "DIO & The World", dps: 90000000, color: 0xf9ca24 },
                     [RARITY_LEGENDARY]: { name: "Jotaro & Star Platinum", dps: 230000000, color: 0x6c5ce7 },
-                    [RARITY_MYTHIC]: { name: "Giorno Requiem Ouro", dps: 700000000, color: 0xffeaa7 }
+                    [RARITY_MYTHIC]: { name: "Giorno Requiem Ouro", dps: 700000000, color: 0xffeaa7 },
+                    [RARITY_SECRET]: { name: "Kars Forma de Vida Suprema", dps: 2100000000, color: 0xff007f, secret: true }
                 }
             },
             10: {
@@ -1370,7 +1626,8 @@
                     [RARITY_RARE]: { name: "Vegeta SSJ Blue", dps: 220000000, color: 0x17c0eb },
                     [RARITY_EPIC]: { name: "Gogeta Blue Cósmico", dps: 600000000, color: 0x7158e2 },
                     [RARITY_LEGENDARY]: { name: "Jiren O Inabalável", dps: 1600000000, color: 0xeb2f06 },
-                    [RARITY_MYTHIC]: { name: "Goku Instinto Superior", dps: 5000000000, color: 0xffffff }
+                    [RARITY_MYTHIC]: { name: "Goku Instinto Superior", dps: 5000000000, color: 0xffffff },
+                    [RARITY_SECRET]: { name: "Zen'oh Rei de Tudo", dps: 15000000000, color: 0x00f0ff, secret: true }
                 }
             }
         };
@@ -1420,7 +1677,21 @@
             inventory: [
                 { id: "starter_01", name: "Clone de Naruto", rarity: RARITY_COMMON, base_dps: 25, dps: 25, level: 1, xp: 0, passive_id: "none", color: 0xf39c12, image: "naruto_clone.jpg" }
             ],
-            equipped_ids: ["starter_01"]
+            equipped_ids: ["starter_01"],
+            pity_legendary: 0,
+            pity_mythic: 0,
+            total_rolls: 0,
+            registry: {
+                "1_Comum": {
+                    island_id: 1,
+                    rarity: RARITY_COMMON,
+                    name: "Clone de Naruto",
+                    dps: 25,
+                    color: 0xf39c12,
+                    image: "naruto_clone.jpg",
+                    date: Date.now()
+                }
+            }
         };
 
         function loadGame() {
@@ -1430,7 +1701,11 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.inventory && parsed.equipped_ids) {
                         state = parsed;
-                        // Ensure all fighters have new XP & passive fields
+                        if (state.pity_legendary === undefined) state.pity_legendary = 0;
+                        if (state.pity_mythic === undefined) state.pity_mythic = 0;
+                        if (state.total_rolls === undefined) state.total_rolls = 0;
+                        if (!state.registry) state.registry = {};
+                        // Ensure all fighters have new XP & passive fields and register into registry
                         state.inventory.forEach(f => {
                             if (f.level === undefined) f.level = 1;
                             if (f.xp === undefined) f.xp = 0;
@@ -1438,10 +1713,42 @@
                             if (!f.base_dps) f.base_dps = f.dps || 25;
                             if (f.name === "Clone de Naruto" && !f.image) f.image = "naruto_clone.jpg";
                             f.dps = calculateFighterDps(f.base_dps, f.level, f.passive_id);
+                            for (let islId in ISLANDS) {
+                                const isl = ISLANDS[islId];
+                                for (let r in isl.fighters) {
+                                    if (isl.fighters[r].name === f.name) {
+                                        const k = `${islId}_${r}`;
+                                        if (!state.registry[k]) {
+                                            state.registry[k] = {
+                                                island_id: parseInt(islId),
+                                                rarity: r,
+                                                name: f.name,
+                                                dps: f.base_dps || f.dps,
+                                                color: f.color,
+                                                image: f.image || "",
+                                                date: Date.now()
+                                            };
+                                        }
+                                    }
+                                }
+                            }
                         });
                     }
                 }
             } catch(e) {}
+            if (!state.registry || Object.keys(state.registry).length === 0) {
+                state.registry = {
+                    "1_Comum": {
+                        island_id: 1,
+                        rarity: RARITY_COMMON,
+                        name: "Clone de Naruto",
+                        dps: 25,
+                        color: 0xf39c12,
+                        image: "naruto_clone.jpg",
+                        date: Date.now()
+                    }
+                };
+            }
         }
         function saveGame() {
             try {
@@ -1532,6 +1839,75 @@
             const capPed = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.8, 0.4, 12), new THREE.MeshLambertMaterial({ color: 0x34495e }));
             capPed.position.set(-28, 0.2, 22);
             islRoot.add(capPed);
+
+            // 3.1 Placa 3D de Probabilidades ao lado da Capsula (Estilo Anime Fighters)
+            const bbGroup = new THREE.Group();
+            bbGroup.position.set(-24.5, 0, 22);
+            bbGroup.rotation.y = -Math.PI / 2;
+
+            const bbLegMat = new THREE.MeshLambertMaterial({ color: 0x2c3e50 });
+            const bbLeg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.2, 8), bbLegMat);
+            bbLeg1.position.set(-1.4, 1.6, 0);
+            bbGroup.add(bbLeg1);
+            const bbLeg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.2, 8), bbLegMat);
+            bbLeg2.position.set(1.4, 1.6, 0);
+            bbGroup.add(bbLeg2);
+
+            const bbFrame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.0, 0.12), new THREE.MeshLambertMaterial({ color: 0x111827 }));
+            bbFrame.position.set(0, 2.3, 0);
+            bbGroup.add(bbFrame);
+
+            const bbCanvas = document.createElement('canvas');
+            bbCanvas.width = 512;
+            bbCanvas.height = 300;
+            const bbCtx = bbCanvas.getContext('2d');
+            bbCtx.fillStyle = '#0a0f1d';
+            bbCtx.fillRect(0, 0, 512, 300);
+            bbCtx.strokeStyle = '#f1c40f';
+            bbCtx.lineWidth = 6;
+            bbCtx.strokeRect(3, 3, 506, 294);
+
+            bbCtx.fillStyle = '#f1c40f';
+            bbCtx.font = 'bold 22px sans-serif';
+            bbCtx.textAlign = 'center';
+            bbCtx.fillText('CHANCES DA C\u00C1PSULA', 256, 34);
+
+            bbCtx.fillStyle = '#55d6ff';
+            bbCtx.font = 'bold 15px sans-serif';
+            bbCtx.fillText('PITY: Lend\u00E1rio 50 | M\u00EDtico 200', 256, 58);
+
+            const miniOdds = [
+                { r: 'Comum', p: '60%', c: '#bdc3c7' },
+                { r: 'Raro', p: '25%', c: '#3498db' },
+                { r: '\u00C9pico', p: '10%', c: '#9b59b6' },
+                { r: 'Lend\u00E1rio', p: '4.4%', c: '#f1c40f' },
+                { r: 'M\u00EDtico', p: '0.5%', c: '#e74c3c' },
+                { r: '??? Secreto', p: '0.1%', c: '#ff007f' }
+            ];
+            for (let idx = 0; idx < 6; idx++) {
+                const cx = 20 + (idx % 3) * 160;
+                const cy = 76 + Math.floor(idx / 3) * 102;
+                bbCtx.fillStyle = '#111a2e';
+                bbCtx.fillRect(cx, cy, 150, 90);
+                bbCtx.strokeStyle = miniOdds[idx].c;
+                bbCtx.lineWidth = 3;
+                bbCtx.strokeRect(cx, cy, 150, 90);
+
+                bbCtx.fillStyle = miniOdds[idx].c;
+                bbCtx.font = 'bold 15px sans-serif';
+                bbCtx.fillText(miniOdds[idx].r, cx + 75, cy + 30);
+
+                bbCtx.fillStyle = '#ffffff';
+                bbCtx.font = 'bold 22px sans-serif';
+                bbCtx.fillText(miniOdds[idx].p, cx + 75, cy + 68);
+            }
+
+            const bbTex = new THREE.CanvasTexture(bbCanvas);
+            const bbScreen = new THREE.Mesh(new THREE.PlaneGeometry(3.06, 1.86), new THREE.MeshBasicMaterial({ map: bbTex }));
+            bbScreen.position.set(0, 2.3, 0.07);
+            bbGroup.add(bbScreen);
+
+            islRoot.add(bbGroup);
 
             interactiveStations.push({
                 type: 'capsule',
@@ -2476,6 +2852,7 @@
             if (e.code === 'KeyI') toggleModal('modal-inventory');
             if (e.code === 'KeyM') toggleModal('modal-islands');
             if (e.code === 'KeyP') toggleModal('modal-passive');
+            if (e.code === 'KeyR') toggleModal('modal-registry');
             if (e.code === 'KeyE') handleInteract();
             if (e.code === 'Escape' || e.code === 'KeyQ') clearTarget();
             if (e.code === 'Space' && isGrounded) {
@@ -3014,7 +3391,7 @@
                 if (st.island_id !== undefined && st.island_id !== state.current_island) continue;
                 if (st.type === 'portal' && (st.target_island_id - 1) !== state.current_island) continue;
                 const dist = playerRoot.position.distanceTo(st.position);
-                if (dist < 4.5) {
+                if (dist < 5.0) {
                     found = st;
                     break;
                 }
@@ -3028,24 +3405,28 @@
                 }
             }
             if (activeInteract) {
-                promptEl.style.display = 'block';
                 if (activeInteract.type === 'capsule') {
-                    const isl = ISLANDS[activeInteract.island_id];
-                    promptEl.innerText = `Cápsula ${isl.name}\n[E] Abrir (${formatNum(isl.capsule_cost)} ${isl.currency_name})`;
-                } else if (activeInteract.type === 'passive_machine') {
-                    const isl = ISLANDS[activeInteract.island_id];
-                    promptEl.innerText = `Máquina de Passivas (${isl.name})\n[E] Rolar Passiva (${formatNum(isl.reroll_cost)} ${isl.currency_name})`;
-                } else if (activeInteract.type === 'portal') {
-                    const targetIsl = ISLANDS[activeInteract.target_island_id];
-                    const isUnlocked = state.unlocked_islands.includes(targetIsl.id);
-                    if (isUnlocked) {
-                        promptEl.innerText = `Portal para: ${targetIsl.name}\n[E] Entrar`;
-                    } else {
-                        promptEl.innerText = `Desbloquear: ${targetIsl.name}\n[E] Custo: ${formatNum(targetIsl.unlock_cost)} ${targetIsl.unlock_curr_name}`;
+                    promptEl.style.display = 'none';
+                    showCapsuleDisplay(activeInteract.island_id);
+                } else {
+                    hideCapsuleDisplay();
+                    promptEl.style.display = 'block';
+                    if (activeInteract.type === 'passive_machine') {
+                        const isl = ISLANDS[activeInteract.island_id];
+                        promptEl.innerText = `M\u00E1quina de Passivas (${isl.name})\n[E] Rolar Passiva (${formatNum(isl.reroll_cost)} ${isl.currency_name})`;
+                    } else if (activeInteract.type === 'portal') {
+                        const targetIsl = ISLANDS[activeInteract.target_island_id];
+                        const isUnlocked = state.unlocked_islands.includes(targetIsl.id);
+                        if (isUnlocked) {
+                            promptEl.innerText = `Portal para: ${targetIsl.name}\n[E] Entrar`;
+                        } else {
+                            promptEl.innerText = `Desbloquear: ${targetIsl.name}\n[E] Custo: ${formatNum(targetIsl.unlock_cost)} ${targetIsl.unlock_curr_name}`;
+                        }
                     }
                 }
             } else {
                 promptEl.style.display = 'none';
+                hideCapsuleDisplay();
             }
         }
 
@@ -3076,7 +3457,7 @@
             }
         }
 
-        /* --- GACHA PULL WITH PROBABILITIES --- */
+        /* --- GACHA PULL WITH PROBABILITIES, PITY & REGISTRY --- */
         function pullGacha(island_id) {
             const isl = ISLANDS[island_id];
             const currentCoins = state.currencies[isl.currency_id] || 0;
@@ -3087,15 +3468,49 @@
 
             state.currencies[isl.currency_id] -= isl.capsule_cost;
 
-            // Exact probabilities: Common 60%, Rare 25%, Epic 10%, Legendary 4.5%, Mythic 0.5%
-            const roll = Math.random();
-            let rarity = RARITY_COMMON;
-            if (roll < 0.005) rarity = RARITY_MYTHIC;
-            else if (roll < 0.05) rarity = RARITY_LEGENDARY;
-            else if (roll < 0.15) rarity = RARITY_EPIC;
-            else if (roll < 0.40) rarity = RARITY_RARE;
+            state.pity_legendary = (state.pity_legendary || 0) + 1;
+            state.pity_mythic = (state.pity_mythic || 0) + 1;
+            state.total_rolls = (state.total_rolls || 0) + 1;
 
-            const pool = isl.fighters[rarity];
+            let rarity = RARITY_COMMON;
+            let isPityGuaranteed = false;
+
+            // 1. Verificacao de Pity (Garantia)
+            // A cada 200 roletadas: garante 1 Mitico!
+            if (state.pity_mythic >= 200) {
+                rarity = RARITY_MYTHIC;
+                state.pity_mythic = 0;
+                state.pity_legendary = 0;
+                isPityGuaranteed = "M\u00EDtico";
+            }
+            // A cada 50 roletadas: garante 1 Lendario!
+            else if (state.pity_legendary >= 50) {
+                rarity = RARITY_LEGENDARY;
+                state.pity_legendary = 0;
+                isPityGuaranteed = "Lend\u00E1rio";
+            }
+            // 2. Rolagem Normal: Secreto 0.1%, Mitico 0.5%, Lendario 4.4%, Epico 10%, Raro 25%, Comum 60%
+            else {
+                const roll = Math.random();
+                if (roll < 0.001) {
+                    rarity = RARITY_SECRET;
+                } else if (roll < 0.006) {
+                    rarity = RARITY_MYTHIC;
+                    state.pity_mythic = 0;
+                    state.pity_legendary = 0;
+                } else if (roll < 0.050) {
+                    rarity = RARITY_LEGENDARY;
+                    state.pity_legendary = 0;
+                } else if (roll < 0.150) {
+                    rarity = RARITY_EPIC;
+                } else if (roll < 0.400) {
+                    rarity = RARITY_RARE;
+                } else {
+                    rarity = RARITY_COMMON;
+                }
+            }
+
+            const pool = isl.fighters[rarity] || isl.fighters[RARITY_COMMON];
             const newFighter = {
                 id: "f_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
                 name: pool.name,
@@ -3111,15 +3526,145 @@
 
             state.inventory.push(newFighter);
             playSound('gacha');
-            showNotification(`Obteve: [${rarity}] ${newFighter.name} (${formatNum(newFighter.dps)} DPS)!`, RARITY_COLORS[rarity]);
+
+            if (isPityGuaranteed) {
+                showNotification(`\u{1F451} GARANTIDO NO PITY! Obteve: [${rarity}] ${newFighter.name}!`, RARITY_COLORS[rarity]);
+            } else if (rarity === RARITY_SECRET) {
+                showNotification(`\u{1F31F} INACREDIT\u00C1VEL! PERSONAGEM SECRETO (0.1%): [${rarity}] ${newFighter.name} (${formatNum(newFighter.dps)} DPS)!`, "#ff007f");
+            } else {
+                showNotification(`Obteve: [${rarity}] ${newFighter.name} (${formatNum(newFighter.dps)} DPS)!`, RARITY_COLORS[rarity]);
+            }
+
+            // Registra na colecao (apenas 1 registro por raridade)
+            if (!state.registry) state.registry = {};
+            const regKey = `${island_id}_${rarity}`;
+            if (!state.registry[regKey]) {
+                state.registry[regKey] = {
+                    island_id: island_id,
+                    rarity: rarity,
+                    name: newFighter.name,
+                    dps: newFighter.dps,
+                    color: newFighter.color,
+                    image: newFighter.image || "",
+                    date: Date.now()
+                };
+                showNotification(`\u{1F4D6} Novo Registro Adicionado \u00E0 Cole\u00E7\u00E3o: [${rarity}] ${newFighter.name}!`, RARITY_COLORS[rarity]);
+            }
 
             if (state.equipped_ids.length < 3) {
                 state.equipped_ids.push(newFighter.id);
             }
             updateFighterMeshes();
+            updateHUD();
+
+            // Atualiza display da capsula se estiver visivel
+            if (activeInteract && activeInteract.type === 'capsule') {
+                showCapsuleDisplay(island_id);
+            }
             saveGame();
         }
 
+        /* --- CAPSULE BILLBOARD SCREEN CONTROLLER --- */
+        const capsuleBoardEl = document.getElementById('capsule-display-board');
+
+        function showCapsuleDisplay(island_id) {
+            if (!capsuleBoardEl) return;
+            const isl = ISLANDS[island_id];
+            if (!isl) return;
+
+            const pityLeg = state.pity_legendary || 0;
+            const pityMyt = state.pity_mythic || 0;
+            const userCoins = state.currencies[isl.currency_id] || 0;
+
+            const rarities = [
+                { r: RARITY_COMMON, pct: "60%", color: RARITY_COLORS[RARITY_COMMON] },
+                { r: RARITY_RARE, pct: "25%", color: RARITY_COLORS[RARITY_RARE] },
+                { r: RARITY_EPIC, pct: "10%", color: RARITY_COLORS[RARITY_EPIC] },
+                { r: RARITY_LEGENDARY, pct: "4.4%", color: RARITY_COLORS[RARITY_LEGENDARY] },
+                { r: RARITY_MYTHIC, pct: "0.5%", color: RARITY_COLORS[RARITY_MYTHIC] },
+                { r: RARITY_SECRET, pct: "0.1%", color: RARITY_COLORS[RARITY_SECRET], isSecret: true }
+            ];
+
+            let cardsHtml = '';
+            rarities.forEach(item => {
+                const fData = isl.fighters[item.r];
+                const isSec = item.isSecret;
+                const displayName = isSec ? "???" : (fData ? fData.name : "Desconhecido");
+                const displayDps = isSec ? "??? DPS" : (fData ? `${formatNum(fData.dps)} DPS` : "");
+                
+                let avatarHtml = '';
+                if (isSec) {
+                    avatarHtml = `<div class="capsule-card-secret-avatar">\u{2753}</div>`;
+                } else if (fData && fData.image) {
+                    avatarHtml = `<img src="${fData.image}" alt="${displayName}">`;
+                } else {
+                    const colHex = fData && fData.color ? '#' + fData.color.toString(16).padStart(6, '0') : item.color;
+                    avatarHtml = `<div style="width:100%;height:100%;background:${colHex};border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:16px;">\u{2605}</div>`;
+                }
+
+                cardsHtml += `
+                    <div class="capsule-card ${isSec ? 'secret-card' : ''}" style="border-color:${item.color};">
+                        <div class="capsule-card-rarity" style="color:${item.color};">${item.r}</div>
+                        <div class="capsule-card-avatar">${avatarHtml}</div>
+                        <div class="capsule-card-name" title="${displayName}">${displayName}</div>
+                        <div class="capsule-card-dps">${displayDps}</div>
+                        <div class="capsule-card-chance" style="color:${item.color}; border-color:${item.color};">${item.pct}</div>
+                    </div>
+                `;
+            });
+
+            capsuleBoardEl.innerHTML = `
+                <div class="capsule-board-header">
+                    <div class="capsule-board-title">C\u00C1PSULA: ${isl.name.toUpperCase()}</div>
+                    <div class="capsule-board-cost">Custo: ${formatNum(isl.capsule_cost)} ${isl.currency_name}</div>
+                </div>
+
+                <div class="capsule-pity-section">
+                    <div class="capsule-pity-box">
+                        <div class="pity-title-row">
+                            <span>\u{1F451} Garantido Lend\u00E1rio (a cada 50)</span>
+                            <span class="pity-count-bold">${pityLeg} / 50</span>
+                        </div>
+                        <div class="pity-progress-bar">
+                            <div class="pity-fill pity-fill-leg" style="width:${Math.min(100, (pityLeg / 50) * 100)}%;"></div>
+                        </div>
+                        <div class="pity-hint">${pityLeg >= 50 ? 'Garantido na pr\u00F3xima!' : `Faltam ${50 - pityLeg} roletadas`}</div>
+                    </div>
+
+                    <div class="capsule-pity-box">
+                        <div class="pity-title-row">
+                            <span>\u{26A1} Garantido M\u00EDtico (a cada 200)</span>
+                            <span class="pity-count-bold">${pityMyt} / 200</span>
+                        </div>
+                        <div class="pity-progress-bar">
+                            <div class="pity-fill pity-fill-myt" style="width:${Math.min(100, (pityMyt / 200) * 100)}%;"></div>
+                        </div>
+                        <div class="pity-hint">${pityMyt >= 200 ? 'Garantido na pr\u00F3xima!' : `Faltam ${200 - pityMyt} roletadas`}</div>
+                    </div>
+                </div>
+
+                <div class="capsule-grid-6">
+                    ${cardsHtml}
+                </div>
+
+                <div class="capsule-action-row" style="margin-top:10px;">
+                    <button class="btn btn-yellow" id="capsule-btn-pull" style="width:100%; padding:10px 14px; font-size:14px; font-weight:800; border-radius:8px; box-shadow:0 4px 15px rgba(241,196,15,0.4);" onclick="handleInteract()">
+                        \u{2B50} ROLAR C\u00C1PSULA (${formatNum(isl.capsule_cost)} ${isl.currency_name}) [E]
+                    </button>
+                    <div style="font-size:11.5px; color:#55d6ff; text-align:center; margin-top:5px; font-weight:600;">
+                        Seu Saldo: ${formatNum(userCoins)} ${isl.currency_name}
+                    </div>
+                </div>
+            `;
+
+            capsuleBoardEl.style.display = 'block';
+        }
+
+        function hideCapsuleDisplay() {
+            if (capsuleBoardEl) {
+                capsuleBoardEl.style.display = 'none';
+            }
+        }
         /* --- PASSIVE REROLL MACHINE MODAL --- */
         let selectedPassiveFighterId = "";
         let passiveIslandId = 1;
@@ -3276,12 +3821,14 @@
             document.getElementById('modal-inventory').style.display = 'none';
             document.getElementById('modal-islands').style.display = 'none';
             document.getElementById('modal-passive').style.display = 'none';
+            const regModal = document.getElementById('modal-registry'); if (regModal) regModal.style.display = 'none';
 
             if (!isVisible) {
                 modal.style.display = 'flex';
                 if (id === 'modal-inventory') renderInventoryGrid();
                 if (id === 'modal-islands') renderIslandsList();
                 if (id === 'modal-passive') renderPassiveModal();
+                if (id === 'modal-registry') renderRegistryModal();
             }
         }
 
@@ -3402,6 +3949,97 @@
         document.getElementById('btn-equip-best').onclick = equipBest;
         document.getElementById('modal-btn-equip-best').onclick = equipBest;
         document.getElementById('btn-save').onclick = saveGame;
+        /* --- REGISTRY / COLLECTION MODAL CONTROLLER --- */
+        let selectedRegistryIsland = 1;
+
+        function renderRegistryModal() {
+            const tabsBar = document.getElementById('registry-tabs-bar');
+            const gridEl = document.getElementById('registry-cards-grid');
+            const subtitleEl = document.getElementById('registry-summary-subtitle');
+            if (!tabsBar || !gridEl) return;
+
+            if (!state.registry) state.registry = {};
+
+            // Total descoberto em todo o jogo
+            const totalSlots = 10 * 6; // 60 registros possiveis
+            const discoveredCount = Object.keys(state.registry).length;
+            if (subtitleEl) {
+                subtitleEl.innerText = `1 Registro \u00DAnico por Raridade | Total Descoberto: ${discoveredCount} / ${totalSlots}`;
+            }
+
+            // Renderiza abas das 10 Ilhas
+            tabsBar.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const isl = ISLANDS[i];
+                let islandDisc = 0;
+                [RARITY_COMMON, RARITY_RARE, RARITY_EPIC, RARITY_LEGENDARY, RARITY_MYTHIC, RARITY_SECRET].forEach(r => {
+                    if (state.registry[`${i}_${r}`]) islandDisc++;
+                });
+
+                const btn = document.createElement('button');
+                btn.className = 'registry-tab-btn' + (selectedRegistryIsland === i ? ' active' : '');
+                btn.innerText = `Ilha ${i}: ${isl.anime} (${islandDisc}/6)`;
+                btn.onclick = () => {
+                    selectedRegistryIsland = i;
+                    renderRegistryModal();
+                };
+                tabsBar.appendChild(btn);
+            }
+
+            // Renderiza os 6 slots de raridade da Ilha Selecionada
+            gridEl.innerHTML = '';
+            const currentIsl = ISLANDS[selectedRegistryIsland];
+            const rarities = [
+                { r: RARITY_COMMON, color: RARITY_COLORS[RARITY_COMMON], pct: "60%" },
+                { r: RARITY_RARE, color: RARITY_COLORS[RARITY_RARE], pct: "25%" },
+                { r: RARITY_EPIC, color: RARITY_COLORS[RARITY_EPIC], pct: "10%" },
+                { r: RARITY_LEGENDARY, color: RARITY_COLORS[RARITY_LEGENDARY], pct: "4.4%" },
+                { r: RARITY_MYTHIC, color: RARITY_COLORS[RARITY_MYTHIC], pct: "0.5%" },
+                { r: RARITY_SECRET, color: RARITY_COLORS[RARITY_SECRET], pct: "0.1%", isSecret: true }
+            ];
+
+            rarities.forEach(item => {
+                const regKey = `${selectedRegistryIsland}_${item.r}`;
+                const reg = state.registry[regKey];
+                const card = document.createElement('div');
+                card.className = 'registry-slot-card ' + (reg ? 'unlocked' : 'locked');
+                card.style.borderColor = reg ? item.color : '#334155';
+
+                if (reg) {
+                    let avatarHtml = '';
+                    if (reg.image) {
+                        avatarHtml = `<img src="${reg.image}" alt="${reg.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+                    } else {
+                        const colHex = reg.color ? '#' + reg.color.toString(16).padStart(6, '0') : item.color;
+                        avatarHtml = `<div style="width:100%;height:100%;background:${colHex};border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:bold;">\u{2605}</div>`;
+                    }
+
+                    card.innerHTML = `
+                        <div style="font-size:11px; font-weight:800; color:${item.color}; text-transform:uppercase;">[${item.r}]</div>
+                        <div style="width:50px; height:50px; border-radius:6px; overflow:hidden; border:2px solid ${item.color}; background:#111;">${avatarHtml}</div>
+                        <div style="font-size:13px; font-weight:bold; color:#fff; min-height:30px; display:flex; align-items:center;">${reg.name}</div>
+                        <div style="font-size:11.5px; color:#f1c40f; font-weight:bold;">Base: ${formatNum(reg.dps)} DPS</div>
+                        <div style="font-size:10.5px; background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71; padding:3px 8px; border-radius:12px; font-weight:bold; margin-top:2px;">
+                            \u{2713} DESBLOQUEADO
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">[${item.r}]</div>
+                        <div style="width:50px; height:50px; border-radius:6px; border:2px dashed #475569; background:#080c14; display:flex; align-items:center; justify-content:center; font-size:22px; color:#475569;">\u{1F512}</div>
+                        <div style="font-size:13px; font-weight:bold; color:#64748b; min-height:30px; display:flex; align-items:center;">???</div>
+                        <div style="font-size:11px; color:#64748b;">Chance: ${item.pct}</div>
+                        <div style="font-size:10.5px; background:rgba(231,76,60,0.12); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:3px 8px; border-radius:12px; font-weight:bold; margin-top:2px;">
+                            BLOQUEADO
+                        </div>
+                    `;
+                }
+                gridEl.appendChild(card);
+            });
+        }
+        const btnReg = document.getElementById('btn-registry'); if (btnReg) btnReg.onclick = () => toggleModal('modal-registry');
+        const mBtnReg = document.getElementById('m-btn-registry'); if (mBtnReg) mBtnReg.onclick = () => toggleModal('modal-registry');
+        const closeReg = document.getElementById('modal-close-registry'); if (closeReg) closeReg.onclick = () => toggleModal('modal-registry');
         document.getElementById('btn-roll-passive').onclick = doRerollPassive;
 
         // Mobile Top Quick Nav Buttons
