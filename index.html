@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1230,6 +1233,9 @@
         <b>[Espaço]</b> Pular &nbsp;|&nbsp; <b>[Botão Direito]</b> Girar Câmera<br>
         <b>[Clique Esquerdo]</b> Focar Inimigo &nbsp;|&nbsp; <b>[E]</b> Interagir
     </div>
+    <div id="version-badge" style="position:fixed; bottom:8px; left:12px; font-size:11px; color:rgba(255,255,255,0.45); pointer-events:none; z-index:9000; text-shadow:1px 1px 2px #000;">
+        v1.3 • Nv. Máx 500 • XP x1.1
+    </div>
 
     <!-- INVENTORY MODAL -->
     <div class="modal" id="modal-inventory">
@@ -1724,6 +1730,11 @@
                             if (!f.passive_id) f.passive_id = "none";
                             if (!f.base_dps) f.base_dps = f.dps || 25;
                             if (f.name === "Clone de Naruto" && !f.image) f.image = "naruto_clone.jpg";
+                            while (f.level < MAX_FIGHTER_LEVEL && f.xp >= getXpNeeded(f.level)) {
+                                f.xp -= getXpNeeded(f.level);
+                                f.level += 1;
+                            }
+                            if (f.level > MAX_FIGHTER_LEVEL) f.level = MAX_FIGHTER_LEVEL;
                             f.dps = calculateFighterDps(f.base_dps, f.level, f.passive_id);
                             for (let islId in ISLANDS) {
                                 const isl = ISLANDS[islId];
