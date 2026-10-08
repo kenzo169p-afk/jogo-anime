@@ -679,6 +679,9 @@
         #orientation-hint {
             display: none !important;
         }
+        #mobile-freeze-overlay {
+            display: none;
+        }
 
         /* 1. MODO PC (JOGADOR NO COMPUTADOR/NOTEBOOK): */
         /* Todos os botões do mobile NÃO aparecem. A interface do desktop fica 100% limpa. */
@@ -689,6 +692,9 @@
             display: none !important;
         }
         body.is-pc #orientation-hint {
+            display: none !important;
+        }
+        body.is-pc #mobile-freeze-overlay {
             display: none !important;
         }
         body.is-pc #bottom-bar {
@@ -914,6 +920,13 @@
     <div id="orientation-hint">
         <span>🔄 Gire o celular na horizontal para melhor visão!</span>
         <button id="orient-hint-close">&times;</button>
+    </div>
+
+    <!-- MOBILE FREEZE OVERLAY (Ao retornar para a aba no celular) -->
+    <div id="mobile-freeze-overlay" style="display:none; position:fixed; inset:0; background:rgba(10, 16, 26, 0.88); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:99999; flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; pointer-events:auto; user-select:none;">
+        <div style="font-size:46px; margin-bottom:10px; filter:drop-shadow(0 0 16px #55d6ff);">❄️</div>
+        <div style="font-size:20px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; text-shadow:0 2px 8px rgba(0,0,0,0.8);">Jogo Pausado</div>
+        <div id="mobile-freeze-countdown" style="font-size:15px; color:#55d6ff; font-weight:700; background:rgba(85,214,255,0.12); padding:6px 16px; border-radius:20px; border:1px solid rgba(85,214,255,0.4);">Retomando em 2 segundos...</div>
     </div>
 
     <!-- TOP HUD & QUICK NAV -->
@@ -2279,6 +2292,7 @@
 
         /* --- DAMAGE NUMBERS POPUP --- */
         function spawnDamageNumber(pos3D, damage, isBoss) {
+            if (document.hidden) return;
             const screenPos = pos3D.clone().project(camera);
             const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
             const y = (-(screenPos.y * 0.5) + 0.5) * window.innerHeight;
@@ -2303,14 +2317,133 @@
         const sprintDot = document.getElementById('sprint-active-dot');
         const sprintLabel = document.getElementById('sprint-label');
 
-        /* --- GAME LOOP --- */
-        let lastTime = performance.now();
+        /* --- BACKGROUND RUN (PC) & FREEZE / UNFREEZE (MOBILE) --- */
+        let isMobileFrozen = false;
+        let freezeResumeTimeout = null;
+        let freezeCountdownInterval = null;
+        let lastBgTime = performance.now();
+        let bgInterval = null;
+        let bgWorker = null;
 
-        function animate(now) {
-            requestAnimationFrame(animate);
-            const delta = Math.min((now - lastTime) / 1000, 0.1);
-            lastTime = now;
+        try {
+            const workerCode = "let timer=null; self.onmessage=function(e){ if(e.data==='start'){ if(!timer) timer=setInterval(()=>self.postMessage('tick'), 100); } else if(e.data==='stop'){ if(timer){ clearInterval(timer); timer=null; } } };";
+            const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+            bgWorker = new Worker(URL.createObjectURL(workerBlob));
+            bgWorker.onmessage = function() {
+                runBackgroundTick();
+            };
+        } catch(e) {
+            bgWorker = null;
+        }
 
+        function runBackgroundTick() {
+            if (document.hidden && !isMobileUser) {
+                const now = performance.now();
+                const delta = Math.min((now - lastBgTime) / 1000, 0.25);
+                lastBgTime = now;
+                updateGamePhysicsAndLogic(delta, now);
+            }
+        }
+
+        function startBackgroundLoop() {
+            lastBgTime = performance.now();
+            if (bgWorker) {
+                try { bgWorker.postMessage('start'); } catch(e) {}
+            }
+            if (!bgInterval) {
+                bgInterval = setInterval(runBackgroundTick, 100);
+            }
+        }
+
+        function stopBackgroundLoop() {
+            if (bgWorker) {
+                try { bgWorker.postMessage('stop'); } catch(e) {}
+            }
+            if (bgInterval) {
+                clearInterval(bgInterval);
+                bgInterval = null;
+            }
+        }
+
+        const mobileFreezeOverlay = document.getElementById('mobile-freeze-overlay');
+        const mobileFreezeCountdown = document.getElementById('mobile-freeze-countdown');
+
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                // 1. O USUÁRIO SAIU DA ABA (mas não fechou)
+                if (isMobileUser) {
+                    // NO MOBILE: Congela o jogo completamente
+                    isMobileFrozen = true;
+                    stopBackgroundLoop();
+                    if (typeof stopJoystick === 'function') stopJoystick();
+                    for (let k in keys) keys[k] = false;
+                    mobileSprintActive = false;
+                    if (freezeResumeTimeout) { clearTimeout(freezeResumeTimeout); freezeResumeTimeout = null; }
+                    if (freezeCountdownInterval) { clearInterval(freezeCountdownInterval); freezeCountdownInterval = null; }
+                } else {
+                    // NO PC: Mantém o jogo rodando em segundo plano (farmando, atacando e evoluindo)
+                    isMobileFrozen = false;
+                    // Limpa teclas de movimento para o boneco não andar sozinho se estava com tecla pressionada
+                    for (let k in keys) keys[k] = false;
+                    startBackgroundLoop();
+                }
+            } else {
+                // 2. O USUÁRIO VOLTOU PARA A ABA
+                if (isMobileUser) {
+                    // NO MOBILE: Permanece congelado e retoma após 2 segundos
+                    if (isMobileFrozen) {
+                        stopBackgroundLoop();
+                        if (mobileFreezeOverlay) mobileFreezeOverlay.style.display = 'flex';
+                        
+                        let remaining = 2;
+                        if (mobileFreezeCountdown) mobileFreezeCountdown.innerText = `Retomando em ${remaining} segundos...`;
+
+                        if (freezeResumeTimeout) clearTimeout(freezeResumeTimeout);
+                        if (freezeCountdownInterval) clearInterval(freezeCountdownInterval);
+
+                        freezeCountdownInterval = setInterval(() => {
+                            remaining--;
+                            if (remaining > 0) {
+                                if (mobileFreezeCountdown) mobileFreezeCountdown.innerText = `Retomando em ${remaining} segundo${remaining > 1 ? 's' : ''}...`;
+                            } else {
+                                clearInterval(freezeCountdownInterval);
+                                freezeCountdownInterval = null;
+                            }
+                        }, 1000);
+
+                        freezeResumeTimeout = setTimeout(() => {
+                            isMobileFrozen = false;
+                            lastTime = performance.now();
+                            lastBgTime = performance.now();
+                            if (mobileFreezeOverlay) mobileFreezeOverlay.style.display = 'none';
+                            showNotification("▶️ Jogo retomado!", "#2ecc71");
+                            freezeResumeTimeout = null;
+                        }, 2000);
+                    }
+                } else {
+                    // NO PC: Volta suavemente para renderização normal de 60 FPS
+                    stopBackgroundLoop();
+                    isMobileFrozen = false;
+                    lastTime = performance.now();
+                    lastBgTime = performance.now();
+                }
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('blur', () => {
+            if (isMobileUser && document.hidden) {
+                handleVisibilityChange();
+            }
+        });
+        window.addEventListener('focus', () => {
+            if (!document.hidden) {
+                handleVisibilityChange();
+            }
+        });
+
+        /* --- GAME LOGIC & PHYSICS UPDATE --- */
+        function updateGamePhysicsAndLogic(delta, now) {
             // Animate Passive Crystals
             passiveCrystals.forEach(c => {
                 c.rotation.y += delta * 1.6;
@@ -2319,9 +2452,11 @@
 
             // 1. SPRINT MECHANIC: Shift key detection ou Mobile Sprint
             isSprinting = keys['ShiftLeft'] || keys['ShiftRight'] || mobileSprintActive;
-            sprintDot.className = isSprinting ? 'active' : '';
-            sprintLabel.innerText = isSprinting ? 'ATIVADO (2x Velocidade)' : 'Desativado [SHIFT]';
-            sprintLabel.style.color = isSprinting ? '#2ecc71' : '#fff';
+            if (sprintDot) sprintDot.className = isSprinting ? 'active' : '';
+            if (sprintLabel) {
+                sprintLabel.innerText = isSprinting ? 'ATIVADO (2x Velocidade)' : 'Desativado [SHIFT]';
+                sprintLabel.style.color = isSprinting ? '#2ecc71' : '#fff';
+            }
 
             const moveSpeed = isSprinting ? 24.0 : 12.0;
 
@@ -2471,7 +2606,25 @@
             if (autoTargetMode && (!currentTarget || currentTarget.is_dead)) {
                 findAndSetNearestMob();
             }
+        }
 
+        /* --- GAME LOOP --- */
+        let lastTime = performance.now();
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+
+            if (isMobileUser && isMobileFrozen) {
+                // No mobile, jogo totalmente congelado
+                lastTime = now;
+                renderer.render(scene, camera);
+                return;
+            }
+
+            const delta = Math.min((now - lastTime) / 1000, 0.1);
+            lastTime = now;
+
+            updateGamePhysicsAndLogic(delta, now);
             renderer.render(scene, camera);
         }
 
