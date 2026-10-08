@@ -1665,41 +1665,311 @@
             };
         }
 
+        /* --- PROCEDURAL TEXTURES FOR NARUTO (ZERO CORS, CARREGA EM QUALQUER DISPOSITIVO) --- */
+        let narutoFaceTex = null;
+        let konohaHeadbandTex = null;
+
+        function getNarutoFaceTexture() {
+            if (narutoFaceTex) return narutoFaceTex;
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            // Cor de pele do Naruto
+            ctx.fillStyle = '#ffdfba';
+            ctx.fillRect(0, 0, 128, 128);
+            // Olhos azuis brilhantes
+            ctx.fillStyle = '#1e3799';
+            ctx.fillRect(28, 48, 22, 18);
+            ctx.fillRect(78, 48, 22, 18);
+            ctx.fillStyle = '#0984e3';
+            ctx.fillRect(34, 52, 12, 12);
+            ctx.fillRect(84, 52, 12, 12);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(38, 52, 6, 6);
+            ctx.fillRect(88, 52, 6, 6);
+            // Marcas de bigode na bochecha (3 de cada lado)
+            ctx.strokeStyle = '#8b5a2b';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(12, 68); ctx.lineTo(32, 70);
+            ctx.moveTo(10, 77); ctx.lineTo(30, 78);
+            ctx.moveTo(14, 86); ctx.lineTo(32, 85);
+            ctx.moveTo(96, 70); ctx.lineTo(116, 68);
+            ctx.moveTo(98, 78); ctx.lineTo(118, 77);
+            ctx.moveTo(96, 85); ctx.lineTo(114, 86);
+            ctx.stroke();
+            // Sorriso ninja confiante
+            ctx.strokeStyle = '#b33939';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(64, 94, 16, 0.15 * Math.PI, 0.85 * Math.PI);
+            ctx.stroke();
+            narutoFaceTex = new THREE.CanvasTexture(canvas);
+            return narutoFaceTex;
+        }
+
+        function getKonohaHeadbandTexture() {
+            if (konohaHeadbandTex) return konohaHeadbandTex;
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            // Placa de metal prateada
+            ctx.fillStyle = '#cfd8dc';
+            ctx.fillRect(0, 0, 128, 64);
+            ctx.strokeStyle = '#90a4ae';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(3, 3, 122, 58);
+            // Rebites nos cantos
+            ctx.fillStyle = '#546e7a';
+            ctx.fillRect(8, 8, 7, 7);
+            ctx.fillRect(113, 8, 7, 7);
+            ctx.fillRect(8, 49, 7, 7);
+            ctx.fillRect(113, 49, 7, 7);
+            // Símbolo clássico da Aldeia da Folha (Konoha)
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(64, 32, 16, 0.35 * Math.PI, 2.05 * Math.PI);
+            ctx.moveTo(58, 17);
+            ctx.lineTo(47, 24);
+            ctx.stroke();
+            konohaHeadbandTex = new THREE.CanvasTexture(canvas);
+            return konohaHeadbandTex;
+        }
+
+        function buildNarutoModel(options = {}) {
+            const scale = options.scale || 1.0;
+            const isClone = options.isClone || false;
+
+            const group = new THREE.Group();
+
+            const cSkin = 0xffdfba;
+            const cOrange = isClone ? 0xffa502 : 0xf39c12;
+            const cDarkNavy = 0x222f3e;
+            const cHair = 0xf1c40f;
+            const cHairSpike = 0xf5cd2f;
+            const cWhite = 0xffffff;
+            const cRed = 0xe74c3c;
+
+            const matSkin = new THREE.MeshLambertMaterial({ color: cSkin });
+            const matOrange = new THREE.MeshLambertMaterial({ color: cOrange });
+            const matDarkNavy = new THREE.MeshLambertMaterial({ color: cDarkNavy });
+            const matHair = new THREE.MeshLambertMaterial({ color: cHair });
+            const matHairSpike = new THREE.MeshLambertMaterial({ color: cHairSpike });
+            const matWhite = new THREE.MeshLambertMaterial({ color: cWhite });
+            const matRed = new THREE.MeshLambertMaterial({ color: cRed });
+
+            // 1. QUADRIL & PERNAS (Calça Laranja do Naruto)
+            const hips = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.35, 0.38), matOrange);
+            hips.position.y = 0.65;
+            group.add(hips);
+
+            // Perna Esquerda
+            const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.65, 0.26), matOrange);
+            leftLeg.position.set(-0.16, 0.33, 0);
+            group.add(leftLeg);
+
+            // Perna Direita (com faixa branca e bolsinha de kunai)
+            const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.65, 0.26), matOrange);
+            rightLeg.position.set(0.16, 0.33, 0);
+            group.add(rightLeg);
+
+            const bandage = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.22, 0.28), matWhite);
+            bandage.position.set(0.16, 0.38, 0);
+            group.add(bandage);
+
+            const kunaiPouch = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.16, 0.14), matDarkNavy);
+            kunaiPouch.position.set(0.28, 0.38, 0);
+            group.add(kunaiPouch);
+
+            // Sandálias Ninjas (Pretas com dedos visíveis)
+            [-0.16, 0.16].forEach(x => {
+                const boot = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.32), matDarkNavy);
+                boot.position.set(x, 0.08, -0.02);
+                group.add(boot);
+
+                const toes = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.08, 0.08), matSkin);
+                toes.position.set(x, 0.05, -0.16);
+                group.add(toes);
+            });
+
+            // 2. TRONCO / JAQUETA SHIPPUDEN
+            // Parte Laranja da Jaqueta
+            const lowerJacket = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 0.4), matOrange);
+            lowerJacket.position.y = 0.95;
+            group.add(lowerJacket);
+
+            // Parte Superior da Jaqueta (Preto/Navy nos Ombros)
+            const upperJacket = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.35, 0.42), matDarkNavy);
+            upperJacket.position.y = 1.25;
+            group.add(upperJacket);
+
+            // Zíper Central Branco
+            const zipper = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.72, 0.04), matWhite);
+            zipper.position.set(0, 1.05, -0.21);
+            group.add(zipper);
+
+            // Emblema Espiral Vermelho Uzumaki no Braço Esquerdo
+            const swirlCrest = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.04, 12), matRed);
+            swirlCrest.rotation.z = Math.PI / 2;
+            swirlCrest.position.set(-0.33, 1.25, 0);
+            group.add(swirlCrest);
+
+            // Bolsinha branca nas costas
+            const backPouch = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.2, 0.1), matWhite);
+            backPouch.position.set(0, 0.88, 0.22);
+            group.add(backPouch);
+
+            // 3. BRAÇOS & MÃOS
+            // Braço Esquerdo
+            const lArmTop = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.22), matDarkNavy);
+            lArmTop.position.set(-0.4, 1.22, 0);
+            group.add(lArmTop);
+            const lArmBottom = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.35, 0.2), matOrange);
+            lArmBottom.position.set(-0.4, 0.98, 0);
+            group.add(lArmBottom);
+            const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.16), matSkin);
+            lHand.position.set(-0.4, 0.75, 0);
+            group.add(lHand);
+
+            // Braço Direito
+            const rArmTop = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.22), matDarkNavy);
+            rArmTop.position.set(0.4, 1.22, 0);
+            group.add(rArmTop);
+            const rArmBottom = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.35, 0.2), matOrange);
+            rArmBottom.position.set(0.4, 0.98, 0);
+            group.add(rArmBottom);
+            const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.16), matSkin);
+            rHand.position.set(0.4, 0.75, 0);
+            group.add(rHand);
+
+            // 4. PESCOÇO & GOLA ALTA LARANJA
+            const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.32, 0.22, 10), matOrange);
+            collar.position.y = 1.45;
+            group.add(collar);
+
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.18, 8), matSkin);
+            neck.position.y = 1.46;
+            group.add(neck);
+
+            // 5. CABEÇA & ROSTO (Com textura de olhos azuis e bigodinhos)
+            const faceMat = new THREE.MeshLambertMaterial({ map: getNarutoFaceTexture() });
+            const headMaterials = [
+                matSkin, // right
+                matSkin, // left
+                matSkin, // top
+                matSkin, // bottom
+                faceMat, // front (rosto!)
+                matSkin  // back
+            ];
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.46, 0.48), headMaterials);
+            head.position.y = 1.72;
+            group.add(head);
+
+            // 6. BANDANA DE KONOHA (Hitai-ate)
+            const headbandCloth = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.16, 0.5), matDarkNavy);
+            headbandCloth.position.y = 1.83;
+            group.add(headbandCloth);
+
+            const headbandPlateMat = new THREE.MeshLambertMaterial({ map: getKonohaHeadbandTexture() });
+            const headbandPlate = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.14, 0.04), headbandPlateMat);
+            headbandPlate.position.set(0, 1.83, -0.26);
+            group.add(headbandPlate);
+
+            // Fitas da bandana balançando atrás
+            const strap1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.04), matDarkNavy);
+            strap1.position.set(-0.06, 1.72, 0.28);
+            strap1.rotation.z = 0.2;
+            group.add(strap1);
+
+            const strap2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.24, 0.04), matDarkNavy);
+            strap2.position.set(0.06, 1.74, 0.28);
+            strap2.rotation.z = -0.25;
+            group.add(strap2);
+
+            // 7. CABELO LOIRO ESPETADO DO NARUTO
+            const hairBase = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.2, 0.52), matHair);
+            hairBase.position.y = 1.95;
+            group.add(hairBase);
+
+            // Espinhos de cabelo icônicos
+            const spikeGeo = new THREE.ConeGeometry(0.12, 0.32, 4);
+            const spikesData = [
+                { pos: [0, 2.12, 0], rot: [0, 0, 0] },
+                { pos: [-0.15, 2.08, 0.06], rot: [0, 0, 0.35] },
+                { pos: [0.15, 2.08, 0.06], rot: [0, 0, -0.35] },
+                { pos: [-0.14, 2.04, -0.16], rot: [-0.3, 0, 0.25] },
+                { pos: [0.14, 2.04, -0.16], rot: [-0.3, 0, -0.25] },
+                { pos: [0, 2.08, -0.18], rot: [-0.35, 0, 0] },
+                { pos: [0, 2.06, 0.2], rot: [0.35, 0, 0] },
+                { pos: [-0.16, 2.02, 0.18], rot: [0.3, 0, 0.3] },
+                { pos: [0.16, 2.02, 0.18], rot: [0.3, 0, -0.3] },
+                { pos: [-0.24, 1.88, 0.02], rot: [0, 0, 0.55] },
+                { pos: [0.24, 1.88, 0.02], rot: [0, 0, -0.55] }
+            ];
+
+            spikesData.forEach(s => {
+                const spike = new THREE.Mesh(spikeGeo, matHairSpike);
+                spike.position.set(...s.pos);
+                spike.rotation.set(...s.rot);
+                group.add(spike);
+            });
+
+            // 8. EFEITOS ESPECIAIS DE CLONE (Se for Kage Bunshin)
+            if (isClone) {
+                // Aura externa de chakra translúcida azul-ciano
+                const chakraAura = new THREE.Mesh(
+                    new THREE.SphereGeometry(1.2, 10, 10),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x00f5ff,
+                        transparent: true,
+                        opacity: 0.18,
+                        wireframe: false
+                    })
+                );
+                chakraAura.position.y = 1.1;
+                group.add(chakraAura);
+
+                // Anel de chakra no chão
+                const groundRing = new THREE.Mesh(
+                    new THREE.RingGeometry(0.35, 0.75, 18),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x00f5ff,
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.85
+                    })
+                );
+                groundRing.rotation.x = -Math.PI / 2;
+                groundRing.position.y = 0.04;
+                group.add(groundRing);
+            }
+
+            group.scale.set(scale, scale, scale);
+            return group;
+        }
+
         /* --- PLAYER SETUP --- */
         const playerRoot = new THREE.Group();
         playerRoot.position.set(0, 0, 25);
         scene.add(playerRoot);
 
-        // Body
-        const pBodyGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.4, 8);
-        const pBodyMat = new THREE.MeshLambertMaterial({ color: 0x3498db });
-        const pBody = new THREE.Mesh(pBodyGeo, pBodyMat);
-        pBody.position.y = 0.8;
+        // Personagem 3D Oficial do Naruto para o Jogador!
+        const pBody = buildNarutoModel({ scale: 1.0, isClone: false });
+        pBody.position.y = 0;
         playerRoot.add(pBody);
-
-        // Head
-        const pHeadGeo = new THREE.SphereGeometry(0.32, 8, 8);
-        const pHeadMat = new THREE.MeshLambertMaterial({ color: 0xfad390 });
-        const pHead = new THREE.Mesh(pHeadGeo, pHeadMat);
-        pHead.position.y = 1.6;
-        playerRoot.add(pHead);
-
-        // Visor
-        const pVisor = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.1), new THREE.MeshBasicMaterial({ color: 0x111111 }));
-        pVisor.position.set(0, 1.6, -0.32);
-        playerRoot.add(pVisor);
 
         // Camera Pivot & Orbit
         let camYaw = 0;
         let camPitch = 0.35;
         let camDist = 7.0;
 
-        /* --- PETS / FIGHTERS --- */
+        /* --- PETS / FIGHTERS (CLONES DE NARUTO 3D) --- */
         const petsGroup = new THREE.Group();
         scene.add(petsGroup);
         const petMeshes = [];
-        const fighterTextureLoader = new THREE.TextureLoader();
-        const fighterTextureCache = {};
 
         function updateFighterMeshes() {
             // Remove old
@@ -1709,34 +1979,28 @@
             const equipped = state.inventory.filter(f => state.equipped_ids.includes(f.id));
             equipped.forEach((f, idx) => {
                 const root = new THREE.Group();
-                if (f.image) {
-                    if (!fighterTextureCache[f.image]) {
-                        fighterTextureCache[f.image] = fighterTextureLoader.load(f.image);
-                    }
-                    const spriteMat = new THREE.SpriteMaterial({ 
-                        map: fighterTextureCache[f.image],
-                        transparent: true
-                    });
-                    const sprite = new THREE.Sprite(spriteMat);
-                    sprite.scale.set(1.0, 1.6, 1.0);
-                    sprite.position.y = 0.8;
-                    root.add(sprite);
 
-                    // Anel de chakra no chão sob o clone
-                    const chakraRing = new THREE.Mesh(
-                        new THREE.RingGeometry(0.2, 0.45, 16),
-                        new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.65 })
-                    );
-                    chakraRing.rotation.x = -Math.PI / 2;
-                    chakraRing.position.y = 0.05;
-                    root.add(chakraRing);
+                // Se for Clone de Naruto ou personagem do Naruto, renderiza o modelo 3D do Clone!
+                if (!f.name || f.name.includes("Naruto") || f.name.includes("Clone")) {
+                    const cloneMesh = buildNarutoModel({ scale: 0.6, isClone: true });
+                    root.add(cloneMesh);
                 } else {
                     const sphere = new THREE.Mesh(
                         new THREE.SphereGeometry(0.35, 10, 10),
                         new THREE.MeshLambertMaterial({ color: f.color || 0xf1c40f })
                     );
+                    sphere.position.y = 0.4;
                     root.add(sphere);
+
+                    const aura = new THREE.Mesh(
+                        new THREE.RingGeometry(0.2, 0.45, 16),
+                        new THREE.MeshBasicMaterial({ color: f.color || 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 })
+                    );
+                    aura.rotation.x = -Math.PI / 2;
+                    aura.position.y = 0.05;
+                    root.add(aura);
                 }
+
                 petsGroup.add(root);
 
                 const atkSpeed = calculateFighterAtkSpeed(f.passive_id);
@@ -2492,9 +2756,9 @@
 
                 // Run bobbing
                 const bobFreq = isSprinting ? 22 : 14;
-                pBody.position.y = 0.8 + Math.abs(Math.sin(now * 0.001 * bobFreq)) * (isSprinting ? 0.14 : 0.06);
+                pBody.position.y = Math.abs(Math.sin(now * 0.001 * bobFreq)) * (isSprinting ? 0.14 : 0.06);
             } else {
-                pBody.position.y = 0.8;
+                pBody.position.y = 0;
             }
 
             // Gravity & Jump
