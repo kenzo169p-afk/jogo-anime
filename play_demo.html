@@ -391,6 +391,25 @@
             font-weight: bold;
             text-transform: uppercase;
         }
+        .card-avatar {
+            width: 78px;
+            height: 98px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 4px 0;
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            background: #0f141c;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+        }
         .card-name {
             font-size: 13px;
             font-weight: bold;
@@ -1149,7 +1168,7 @@
                 capsule_cost: 100, reroll_cost: 50, unlock_cost: 0, unlock_curr_id: "", unlock_curr_name: "Gratuito",
                 ground_color: 0x3d7e3d, z_pos: 0,
                 fighters: {
-                    [RARITY_COMMON]: { name: "Clone de Naruto", dps: 25, color: 0xf39c12 },
+                    [RARITY_COMMON]: { name: "Clone de Naruto", dps: 25, color: 0xf39c12, image: "naruto_clone.jpg" },
                     [RARITY_RARE]: { name: "Sasuke Genin", dps: 65, color: 0x2980b9 },
                     [RARITY_EPIC]: { name: "Kakashi do Sharingan", dps: 160, color: 0x7f8c8d },
                     [RARITY_LEGENDARY]: { name: "Itachi Akatsuki", dps: 420, color: 0xc0392b },
@@ -1336,7 +1355,7 @@
             unlocked_islands: [1],
             current_island: 1,
             inventory: [
-                { id: "starter_01", name: "Clone de Naruto", rarity: RARITY_COMMON, base_dps: 25, dps: 25, level: 1, xp: 0, passive_id: "none", color: 0xf39c12 }
+                { id: "starter_01", name: "Clone de Naruto", rarity: RARITY_COMMON, base_dps: 25, dps: 25, level: 1, xp: 0, passive_id: "none", color: 0xf39c12, image: "naruto_clone.jpg" }
             ],
             equipped_ids: ["starter_01"]
         };
@@ -1354,6 +1373,7 @@
                             if (f.xp === undefined) f.xp = 0;
                             if (!f.passive_id) f.passive_id = "none";
                             if (!f.base_dps) f.base_dps = f.dps || 25;
+                            if (f.name === "Clone de Naruto" && !f.image) f.image = "naruto_clone.jpg";
                             f.dps = calculateFighterDps(f.base_dps, f.level, f.passive_id);
                         });
                     }
@@ -1665,6 +1685,8 @@
         const petsGroup = new THREE.Group();
         scene.add(petsGroup);
         const petMeshes = [];
+        const fighterTextureLoader = new THREE.TextureLoader();
+        const fighterTextureCache = {};
 
         function updateFighterMeshes() {
             // Remove old
@@ -1674,11 +1696,34 @@
             const equipped = state.inventory.filter(f => state.equipped_ids.includes(f.id));
             equipped.forEach((f, idx) => {
                 const root = new THREE.Group();
-                const sphere = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.35, 10, 10),
-                    new THREE.MeshLambertMaterial({ color: f.color || 0xf1c40f })
-                );
-                root.add(sphere);
+                if (f.image) {
+                    if (!fighterTextureCache[f.image]) {
+                        fighterTextureCache[f.image] = fighterTextureLoader.load(f.image);
+                    }
+                    const spriteMat = new THREE.SpriteMaterial({ 
+                        map: fighterTextureCache[f.image],
+                        transparent: true
+                    });
+                    const sprite = new THREE.Sprite(spriteMat);
+                    sprite.scale.set(1.0, 1.6, 1.0);
+                    sprite.position.y = 0.8;
+                    root.add(sprite);
+
+                    // Anel de chakra no chão sob o clone
+                    const chakraRing = new THREE.Mesh(
+                        new THREE.RingGeometry(0.2, 0.45, 16),
+                        new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.65 })
+                    );
+                    chakraRing.rotation.x = -Math.PI / 2;
+                    chakraRing.position.y = 0.05;
+                    root.add(chakraRing);
+                } else {
+                    const sphere = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.35, 10, 10),
+                        new THREE.MeshLambertMaterial({ color: f.color || 0xf1c40f })
+                    );
+                    root.add(sphere);
+                }
                 petsGroup.add(root);
 
                 const atkSpeed = calculateFighterAtkSpeed(f.passive_id);
@@ -2593,7 +2638,8 @@
                 level: 1,
                 xp: 0,
                 passive_id: "none",
-                color: pool.color
+                color: pool.color,
+                image: pool.image || ""
             };
 
             state.inventory.push(newFighter);
@@ -2786,8 +2832,14 @@
                 const p = PASSIVES[f.passive_id] || PASSIVES['none'];
                 const pColor = RARITY_COLORS[p.rarity] || '#888';
 
+                const avatarHtml = f.image ? `
+                    <div class="card-avatar">
+                        <img src="${f.image}" alt="${f.name}">
+                    </div>` : '';
+
                 card.innerHTML = `
                     <div class="card-rarity" style="color:${RARITY_COLORS[f.rarity]}">${f.rarity}</div>
+                    ${avatarHtml}
                     <div class="card-name">${f.name}</div>
                     <div class="card-level">Nv. ${f.level} / 250</div>
                     <div class="card-xp-bar">
