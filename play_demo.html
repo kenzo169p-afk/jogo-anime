@@ -649,68 +649,108 @@
             to { box-shadow: 0 0 16px rgba(241, 196, 15, 0.95); transform: scale(1.06); }
         }
 
-        /* RESPONSIVIDADE MOBILE COMPLETA */
-        @media (max-width: 850px), (pointer: coarse) {
-            #top-bar {
-                top: 6px;
-                left: 6px;
-                right: 6px;
-                transform: none;
-                width: auto;
-                padding: 6px 10px;
-                justify-content: space-between;
-                gap: 6px;
-            }
-            #top-info-group {
-                align-items: flex-start;
-                gap: 1px;
-            }
-            #island-title { font-size: 12px; }
-            #currency-text { font-size: 11px; }
-            #team-dps-text { font-size: 10px; }
+        /* --- REGRAS DE VISIBILIDADE: PC vs MOBILE --- */
+        /* Padrão de segurança: Controles mobile e menu touch ficam RIGOROSAMENTE OCULTOS */
+        #mobile-controls-container {
+            display: none !important;
+        }
+        #top-mobile-nav {
+            display: none !important;
+        }
+        #orientation-hint {
+            display: none !important;
+        }
 
-            #top-mobile-nav {
-                display: flex;
-            }
-            .nav-btn span {
-                display: none;
-            }
-            .nav-btn {
-                padding: 5px 8px;
-                font-size: 14px;
-            }
+        /* 1. MODO PC (JOGADOR NO COMPUTADOR/NOTEBOOK): */
+        /* Todos os botões do mobile NÃO aparecem. A interface do desktop fica 100% limpa. */
+        body.is-pc #mobile-controls-container {
+            display: none !important;
+        }
+        body.is-pc #top-mobile-nav {
+            display: none !important;
+        }
+        body.is-pc #orientation-hint {
+            display: none !important;
+        }
+        body.is-pc #bottom-bar {
+            display: flex !important;
+        }
+        body.is-pc #sprint-badge {
+            display: flex !important;
+        }
+        body.is-pc #controls-badge {
+            display: block !important;
+        }
 
-            #bottom-bar {
-                display: none !important;
-            }
+        /* 2. MODO MOBILE (JOGADOR NO CELULAR/TABLET): */
+        /* Exibe joystick virtual dinâmico, 6 botões touch e menu rápido no topo */
+        body.is-mobile #mobile-controls-container {
+            display: block !important;
+        }
+        body.is-mobile #top-mobile-nav {
+            display: flex !important;
+        }
+        body.is-mobile #bottom-bar {
+            display: none !important;
+        }
+        body.is-mobile #sprint-badge {
+            display: none !important;
+        }
+        body.is-mobile #controls-badge {
+            display: none !important;
+        }
+        body.is-mobile.is-portrait #orientation-hint {
+            display: flex !important;
+        }
 
-            #target-panel {
-                top: 56px;
-                padding: 4px 10px;
-                min-width: 170px;
-                max-width: 240px;
-            }
-            #target-name { font-size: 12px; }
+        /* Adaptações do HUD apenas para o Mobile */
+        body.is-mobile #top-bar {
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            transform: none;
+            width: auto;
+            padding: 6px 10px;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        body.is-mobile #top-info-group {
+            align-items: flex-start;
+            gap: 1px;
+        }
+        body.is-mobile #island-title { font-size: 12px; }
+        body.is-mobile #currency-text { font-size: 11px; }
+        body.is-mobile #team-dps-text { font-size: 10px; }
 
-            #sprint-badge {
-                display: none !important;
-            }
+        body.is-mobile .nav-btn span {
+            display: none;
+        }
+        body.is-mobile .nav-btn {
+            padding: 5px 8px;
+            font-size: 14px;
+        }
 
-            #controls-badge {
-                display: none !important;
-            }
+        body.is-mobile #target-panel {
+            top: 56px;
+            padding: 4px 10px;
+            min-width: 170px;
+            max-width: 240px;
+        }
+        body.is-mobile #target-name { font-size: 12px; }
 
-            #interact-prompt {
-                top: auto;
-                bottom: 155px;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 12px;
-                padding: 9px 16px;
-                cursor: pointer;
-                pointer-events: auto;
-            }
+        body.is-mobile #interact-prompt {
+            top: auto;
+            bottom: 155px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            padding: 9px 16px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
 
+        /* Responsividade para modais */
+        @media (max-width: 850px) {
             .modal {
                 width: 95vw !important;
                 max-width: 95vw !important;
@@ -804,12 +844,6 @@
             }
             .mobile-btn .m-txt {
                 font-size: 7.5px;
-            }
-        }
-
-        @media (max-width: 768px) and (orientation: portrait) {
-            #orientation-hint {
-                display: flex;
             }
         }
     </style>
@@ -1690,11 +1724,44 @@
         const mobileBtnAuto = document.getElementById('mobile-btn-auto');
         const mobileBtnCamera = document.getElementById('mobile-btn-camera');
 
+        let isMobileUser = false;
+
+        function detectIsMobile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mobile') === '1') return true;
+            if (urlParams.get('pc') === '1') return false;
+            const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
+            const isIPadOS = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            return Boolean(isMobileUA || isIPadOS);
+        }
+
+        function updateOrientationClass() {
+            if (window.innerHeight > window.innerWidth) {
+                document.body.classList.add('is-portrait');
+                document.body.classList.remove('is-landscape');
+            } else {
+                document.body.classList.add('is-landscape');
+                document.body.classList.remove('is-portrait');
+            }
+        }
+
+        function applyDeviceMode(mobile) {
+            isMobileUser = Boolean(mobile);
+            if (isMobileUser) {
+                document.body.classList.add('is-mobile');
+                document.body.classList.remove('is-pc');
+                if (mobileControlsContainer) mobileControlsContainer.style.display = 'block';
+            } else {
+                document.body.classList.add('is-pc');
+                document.body.classList.remove('is-mobile');
+                if (mobileControlsContainer) mobileControlsContainer.style.display = 'none';
+            }
+            updateOrientationClass();
+        }
+
         function isMobileOrTouch() {
-            return ('ontouchstart' in window) || 
-                   (navigator.maxTouchPoints > 0) || 
-                   window.matchMedia("(pointer: coarse)").matches || 
-                   window.innerWidth <= 1024;
+            return isMobileUser;
         }
 
         function findAndSetNearestMob() {
@@ -1748,15 +1815,13 @@
         }
 
         function setupMobileControls() {
-            if (isMobileOrTouch() && mobileControlsContainer) {
-                mobileControlsContainer.style.display = 'block';
-            }
+            // Aplica estado de dispositivo (PC ou Mobile)
+            applyDeviceMode(detectIsMobile());
 
-            // Desbloqueio global de áudio no primeiro toque e ativação dos controles
-            ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(evt => {
+            // Desbloqueio global de áudio na primeira interação do jogador
+            ['touchstart', 'mousedown', 'keydown'].forEach(evt => {
                 window.addEventListener(evt, () => {
                     initAudio();
-                    if (mobileControlsContainer) mobileControlsContainer.style.display = 'block';
                 }, { passive: true, once: true });
             });
 
@@ -2849,9 +2914,7 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            if (isMobileOrTouch() && mobileControlsContainer) {
-                mobileControlsContainer.style.display = 'block';
-            }
+            updateOrientationClass();
         });
 
         window.addEventListener('orientationchange', () => {
@@ -2859,6 +2922,7 @@
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
+                updateOrientationClass();
             }, 120);
         });
 
