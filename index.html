@@ -1,0 +1,2936 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1e29">
+    <title>Anime Fighters Simulator - Demo Jogável (Godot 4.x Clone)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1a1e29;
+            color: #fff;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 1;
+        }
+
+        /* HUD TOP BAR */
+        #top-bar {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 18, 26, 0.9);
+            border: 2px solid #2e4164;
+            border-radius: 12px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+        }
+        #top-info-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        #island-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        #currency-text {
+            font-size: 15px;
+            color: #55d6ff;
+            font-weight: 600;
+        }
+        #team-dps-text {
+            font-size: 13px;
+            color: #e070ff;
+        }
+        #top-mobile-nav {
+            display: none;
+            gap: 6px;
+            align-items: center;
+        }
+        .nav-btn {
+            background: rgba(28, 38, 55, 0.92);
+            border: 1px solid #3d5375;
+            color: #fff;
+            padding: 7px 11px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+            touch-action: manipulation;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .nav-btn:active {
+            transform: scale(0.92);
+            background: #2e4164;
+        }
+        .nav-btn-green {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        .nav-btn-yellow {
+            border-color: #f1c40f;
+            color: #f1c40f;
+        }
+
+        /* ORIENTATION HINT */
+        #orientation-hint {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(26, 42, 68, 0.95);
+            border: 1px solid #55d6ff;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 11px;
+            color: #55d6ff;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 25;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            backdrop-filter: blur(6px);
+        }
+        #orient-hint-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 0 2px;
+            line-height: 1;
+        }
+
+        /* TARGET PANEL */
+        #target-panel {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 24, 34, 0.92);
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 8px 18px;
+            min-width: 280px;
+            text-align: center;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            backdrop-filter: blur(4px);
+        }
+        #target-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        #target-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #ff6b6b;
+            flex: 1;
+        }
+        #target-close-btn {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            border-radius: 4px;
+            color: #ff6b6b;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 7px;
+            line-height: 20px;
+            margin-left: 8px;
+        }
+        .hp-bar-bg {
+            width: 100%;
+            height: 14px;
+            background: #2c3e50;
+            border-radius: 7px;
+            overflow: hidden;
+            position: relative;
+        }
+        #target-hp-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12);
+            transition: width 0.1s ease;
+        }
+        #target-hp-num {
+            font-size: 11px;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            line-height: 14px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px #000;
+        }
+
+        /* NOTIFICATION TOAST */
+        #notification {
+            position: absolute;
+            top: 175px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 20px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #ffcc00;
+            color: #ffcc00;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+            z-index: 20;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+
+        /* BOTTOM BAR ACTIONS */
+        #bottom-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+        .btn {
+            background: #212c3d;
+            border: 1px solid #3d5375;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.15s ease;
+        }
+        .btn:hover {
+            background: #2e3e57;
+            transform: translateY(-2px);
+        }
+        .btn-green {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        .btn-yellow {
+            border-color: #f1c40f;
+            color: #f1c40f;
+        }
+
+        /* SPRINT BADGE */
+        #sprint-badge {
+            position: absolute;
+            bottom: 85px;
+            left: 20px;
+            background: rgba(15, 20, 30, 0.85);
+            border: 1px solid #3d5375;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+        #sprint-active-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #7f8c8d;
+        }
+        #sprint-active-dot.active {
+            background: #2ecc71;
+            box-shadow: 0 0 8px #2ecc71;
+        }
+
+        /* CONTROLS GUIDE */
+        #controls-badge {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 20, 30, 0.85);
+            border: 1px solid #3d5375;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #bdc3c7;
+            line-height: 1.6;
+            z-index: 10;
+        }
+
+        /* PROMPT INTERACTION */
+        #interact-prompt {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 18, 26, 0.95);
+            border: 2px solid #ffcc00;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #ffcc00;
+            display: none;
+            z-index: 15;
+            text-align: center;
+            white-space: pre-line;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+
+        /* MODALS */
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(18, 22, 32, 0.96);
+            border: 2px solid #3d5375;
+            border-radius: 12px;
+            width: 840px;
+            max-width: 95vw;
+            height: 580px;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 30;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #2d3b52;
+            padding-bottom: 10px;
+        }
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+        .modal-close {
+            background: #e74c3c;
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .modal-content {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 6px;
+        }
+
+        /* INVENTORY GRID */
+        .inv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 12px;
+        }
+        .fighter-card {
+            background: #18202c;
+            border: 2px solid #7f8c8d;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 3px;
+        }
+        .card-rarity {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .card-name {
+            font-size: 13px;
+            font-weight: bold;
+            margin: 2px 0;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+        }
+        .card-level {
+            font-size: 11px;
+            color: #55d6ff;
+            font-weight: 600;
+        }
+        .card-xp-bar {
+            width: 100%;
+            height: 6px;
+            background: #2c3e50;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 2px 0;
+        }
+        .card-xp-fill {
+            height: 100%;
+            background: #2ecc71;
+            width: 0%;
+        }
+        .card-xp-text {
+            font-size: 10px;
+            color: #bdc3c7;
+        }
+        .card-passive {
+            font-size: 11px;
+            font-weight: 600;
+            margin: 2px 0;
+        }
+        .card-dps {
+            font-size: 12px;
+            color: #f39c12;
+            margin-bottom: 6px;
+        }
+        .card-btn {
+            width: 100%;
+            padding: 6px;
+            border-radius: 4px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .card-btn-equip {
+            background: #27ae60;
+            color: #fff;
+        }
+        .card-btn-unequip {
+            background: #c0392b;
+            color: #fff;
+        }
+
+        /* PASSIVE MACHINE MODAL */
+        #modal-passive {
+            width: 760px;
+            max-width: 95vw;
+            height: 540px;
+        }
+        .passive-layout {
+            display: flex;
+            gap: 16px;
+            height: 100%;
+        }
+        .passive-list-col {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 6px;
+            border-right: 1px solid #2d3b52;
+        }
+        .passive-fighter-item {
+            background: #18202c;
+            border: 2px solid #2d3b52;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+        }
+        .passive-fighter-item:hover {
+            border-color: #55d6ff;
+        }
+        .passive-fighter-item.selected {
+            border-color: #f1c40f;
+            background: #222d3d;
+        }
+        .passive-details-col {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .passive-odds-box {
+            background: #121722;
+            border: 1px solid #2d3b52;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #bdc3c7;
+            line-height: 1.6;
+        }
+
+        /* ISLAND LIST */
+        .island-row {
+            background: #18202c;
+            border: 1px solid #2d3b52;
+            border-radius: 6px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .island-info h4 {
+            color: #ecf0f1;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        .island-info p {
+            color: #95a5a6;
+            font-size: 12px;
+        }
+
+        /* DAMAGE NUMBERS OVERLAY */
+        .damage-number {
+            position: absolute;
+            font-weight: bold;
+            font-size: 18px;
+            color: #ff4757;
+            text-shadow: 0 0 4px #000, 0 0 8px #000;
+            pointer-events: none;
+            z-index: 5;
+            transition: all 0.6s ease-out;
+        }
+
+        /* --- MOBILE TOUCH CONTROLS --- */
+        #mobile-controls-container {
+            display: none;
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        #joystick-zone {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 45vw;
+            height: 55vh;
+            pointer-events: auto;
+            touch-action: none;
+        }
+
+        #joystick-base {
+            width: 124px;
+            height: 124px;
+            border-radius: 50%;
+            background: rgba(18, 26, 42, 0.65);
+            border: 2px solid rgba(85, 214, 255, 0.45);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 0 14px rgba(85, 214, 255, 0.2);
+            position: absolute;
+            left: 26px;
+            bottom: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        #joystick-stick {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #55d6ff 0%, #1f5f99 100%);
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+            position: absolute;
+            transform: translate(0, 0);
+            pointer-events: none;
+            transition: transform 0.04s ease-out;
+        }
+
+        #mobile-actions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 56px);
+            grid-gap: 10px;
+            pointer-events: auto;
+        }
+
+        .mobile-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(22, 30, 46, 0.9);
+            border: 2px solid #3d5375;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .mobile-btn:active {
+            transform: scale(0.90);
+            background: #2e4164;
+        }
+
+        .mobile-btn .m-icon {
+            font-size: 19px;
+            line-height: 1;
+        }
+
+        .mobile-btn .m-txt {
+            font-size: 8px;
+            font-weight: bold;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        .mobile-btn.btn-active {
+            background: rgba(46, 204, 113, 0.35);
+            border-color: #2ecc71;
+            color: #2ecc71;
+            box-shadow: 0 0 14px rgba(46, 204, 113, 0.7);
+        }
+
+        .mobile-btn.btn-highlight {
+            border-color: #f1c40f;
+            animation: pulse-glow 1.4s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 4px rgba(241, 196, 15, 0.4); transform: scale(1); }
+            to { box-shadow: 0 0 16px rgba(241, 196, 15, 0.95); transform: scale(1.06); }
+        }
+
+        /* --- REGRAS DE VISIBILIDADE: PC vs MOBILE --- */
+        /* Padrão de segurança: Controles mobile e menu touch ficam RIGOROSAMENTE OCULTOS */
+        #mobile-controls-container {
+            display: none !important;
+        }
+        #top-mobile-nav {
+            display: none !important;
+        }
+        #orientation-hint {
+            display: none !important;
+        }
+
+        /* 1. MODO PC (JOGADOR NO COMPUTADOR/NOTEBOOK): */
+        /* Todos os botões do mobile NÃO aparecem. A interface do desktop fica 100% limpa. */
+        body.is-pc #mobile-controls-container {
+            display: none !important;
+        }
+        body.is-pc #top-mobile-nav {
+            display: none !important;
+        }
+        body.is-pc #orientation-hint {
+            display: none !important;
+        }
+        body.is-pc #bottom-bar {
+            display: flex !important;
+        }
+        body.is-pc #sprint-badge {
+            display: flex !important;
+        }
+        body.is-pc #controls-badge {
+            display: block !important;
+        }
+
+        /* 2. MODO MOBILE (JOGADOR NO CELULAR/TABLET): */
+        /* Exibe joystick virtual dinâmico, 6 botões touch e menu rápido no topo */
+        body.is-mobile #mobile-controls-container {
+            display: block !important;
+        }
+        body.is-mobile #top-mobile-nav {
+            display: flex !important;
+        }
+        body.is-mobile #bottom-bar {
+            display: none !important;
+        }
+        body.is-mobile #sprint-badge {
+            display: none !important;
+        }
+        body.is-mobile #controls-badge {
+            display: none !important;
+        }
+        body.is-mobile.is-portrait #orientation-hint {
+            display: flex !important;
+        }
+
+        /* Adaptações do HUD apenas para o Mobile */
+        body.is-mobile #top-bar {
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            transform: none;
+            width: auto;
+            padding: 6px 10px;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        body.is-mobile #top-info-group {
+            align-items: flex-start;
+            gap: 1px;
+        }
+        body.is-mobile #island-title { font-size: 12px; }
+        body.is-mobile #currency-text { font-size: 11px; }
+        body.is-mobile #team-dps-text { font-size: 10px; }
+
+        body.is-mobile .nav-btn span {
+            display: none;
+        }
+        body.is-mobile .nav-btn {
+            padding: 5px 8px;
+            font-size: 14px;
+        }
+
+        body.is-mobile #target-panel {
+            top: 56px;
+            padding: 4px 10px;
+            min-width: 170px;
+            max-width: 240px;
+        }
+        body.is-mobile #target-name { font-size: 12px; }
+
+        body.is-mobile #interact-prompt {
+            top: auto;
+            bottom: 155px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            padding: 9px 16px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        /* Responsividade para modais */
+        @media (max-width: 850px) {
+            .modal {
+                width: 95vw !important;
+                max-width: 95vw !important;
+                height: 88vh !important;
+                max-height: 88vh !important;
+                padding: 12px;
+            }
+            .modal-title { font-size: 14px; }
+            .modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+
+            /* PASSIVE MODAL ADAPTATION */
+            #modal-passive {
+                height: 90vh !important;
+            }
+            #modal-passive .modal-content {
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .passive-layout {
+                flex-direction: column !important;
+                height: auto !important;
+                gap: 12px !important;
+            }
+            .passive-list-col {
+                max-height: 150px !important;
+                border-right: none !important;
+                border-bottom: 1px solid #2d3b52 !important;
+                padding-bottom: 10px !important;
+                padding-right: 0 !important;
+            }
+            .passive-fighter-item {
+                padding: 8px 10px !important;
+            }
+            .passive-details-col {
+                flex: none !important;
+                gap: 10px !important;
+            }
+            .passive-odds-box {
+                font-size: 11px !important;
+                padding: 8px 10px !important;
+            }
+            #btn-roll-passive {
+                padding: 12px !important;
+                font-size: 14px !important;
+            }
+
+            .inv-grid {
+                grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)) !important;
+                gap: 6px !important;
+            }
+            .fighter-card {
+                padding: 8px !important;
+            }
+            .card-btn {
+                padding: 8px !important;
+                font-size: 12px !important;
+            }
+
+            .island-row {
+                padding: 10px 12px !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px !important;
+            }
+            .island-row > div:last-child {
+                width: 100% !important;
+            }
+            .island-row button {
+                width: 100% !important;
+                padding: 8px 12px !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #mobile-actions {
+                grid-template-columns: repeat(3, 48px);
+                grid-gap: 8px;
+                bottom: 14px;
+                right: 14px;
+            }
+            .mobile-btn {
+                width: 48px;
+                height: 48px;
+            }
+            .mobile-btn .m-icon {
+                font-size: 16px;
+            }
+            .mobile-btn .m-txt {
+                font-size: 7.5px;
+            }
+        }
+    </style>
+    <!-- Three.js CDN for Low-Poly 3D rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- MOBILE TOUCH CONTROLS -->
+    <div id="mobile-controls-container">
+        <!-- VIRTUAL JOYSTICK -->
+        <div id="joystick-zone">
+            <div id="joystick-base">
+                <div id="joystick-stick"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT ACTION BUTTONS (6 ERGONOMIC CONTROLS) -->
+        <div id="mobile-actions">
+            <button id="mobile-btn-camera" class="mobile-btn" type="button" title="Centralizar Câmera">
+                <span class="m-icon">🔄</span>
+                <span class="m-txt">Câmera</span>
+            </button>
+            <button id="mobile-btn-auto" class="mobile-btn" type="button" title="Auto-Farm (Mirar Próximo)">
+                <span class="m-icon">⚔️</span>
+                <span class="m-txt">Auto</span>
+            </button>
+            <button id="mobile-btn-target" class="mobile-btn" type="button" title="Focar / Desmarcar Alvo">
+                <span class="m-icon">🎯</span>
+                <span class="m-txt">Alvo</span>
+            </button>
+            <button id="mobile-btn-interact" class="mobile-btn" type="button" title="Interagir com Estação">
+                <span class="m-icon">💬</span>
+                <span class="m-txt">Ação</span>
+            </button>
+            <button id="mobile-btn-sprint" class="mobile-btn" type="button" title="Alternar Corrida Rápida">
+                <span class="m-icon">⚡</span>
+                <span class="m-txt">Sprint</span>
+            </button>
+            <button id="mobile-btn-jump" class="mobile-btn" type="button" title="Pular">
+                <span class="m-icon">🦘</span>
+                <span class="m-txt">Pular</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ORIENTATION HINT (Mobile Portrait) -->
+    <div id="orientation-hint">
+        <span>🔄 Gire o celular na horizontal para melhor visão!</span>
+        <button id="orient-hint-close">&times;</button>
+    </div>
+
+    <!-- TOP HUD & QUICK NAV -->
+    <div id="top-bar">
+        <div id="top-info-group">
+            <div id="island-title">Ilha 1: Vila da Folha (Naruto)</div>
+            <div id="currency-text">Ienes Ninja: 100</div>
+            <div id="team-dps-text">DPS da Equipe: 25 (1/3)</div>
+        </div>
+        <div id="top-mobile-nav">
+            <button class="nav-btn" id="m-btn-inv" title="Inventário">🎒 <span>Inv</span></button>
+            <button class="nav-btn" id="m-btn-islands" title="Ilhas">🗺️ <span>Ilhas</span></button>
+            <button class="nav-btn nav-btn-yellow" id="m-btn-passives" title="Passivas">⚙️ <span>Passivas</span></button>
+            <button class="nav-btn nav-btn-green" id="m-btn-equip" title="Equipar Melhores">⭐ <span>Melhores</span></button>
+            <button class="nav-btn" id="m-btn-save" title="Salvar Jogo">💾 <span>Salvar</span></button>
+            <button class="nav-btn" id="m-btn-fs" title="Tela Cheia">⛶</button>
+        </div>
+    </div>
+
+    <!-- TARGET MOB BAR -->
+    <div id="target-panel">
+        <div id="target-header">
+            <div id="target-name">Ninja Renegado</div>
+            <button id="target-close-btn" type="button" title="Desmarcar Alvo">&times;</button>
+        </div>
+        <div class="hp-bar-bg">
+            <div id="target-hp-fill"></div>
+            <div id="target-hp-num">100 / 100</div>
+        </div>
+    </div>
+
+    <!-- PROMPT INTERACTION -->
+    <div id="interact-prompt">[E] Abrir Cápsula (100 Ienes Ninja)</div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="notification">Mensagem do Sistema</div>
+
+    <!-- BOTTOM ACTION BUTTONS -->
+    <div id="bottom-bar">
+        <button class="btn" id="btn-inventory">Inventário [I]</button>
+        <button class="btn" id="btn-islands">Ilhas [M]</button>
+        <button class="btn btn-yellow" id="btn-passives">Passivas [P]</button>
+        <button class="btn btn-green" id="btn-equip-best">Equipar Melhores</button>
+        <button class="btn" id="btn-save">Salvar Jogo</button>
+    </div>
+
+    <!-- SPRINT BADGE -->
+    <div id="sprint-badge">
+        <div id="sprint-active-dot"></div>
+        <span>Sprint: <b id="sprint-label">Desativado [SHIFT]</b></span>
+    </div>
+
+    <!-- CONTROLS GUIDE -->
+    <div id="controls-badge">
+        <b>[WASD]</b> Mover &nbsp;|&nbsp; <b>[SHIFT]</b> Sprint Corrida<br>
+        <b>[Espaço]</b> Pular &nbsp;|&nbsp; <b>[Botão Direito]</b> Girar Câmera<br>
+        <b>[Clique Esquerdo]</b> Focar Inimigo &nbsp;|&nbsp; <b>[E]</b> Interagir
+    </div>
+
+    <!-- INVENTORY MODAL -->
+    <div class="modal" id="modal-inventory">
+        <div class="modal-header">
+            <div class="modal-title">INVENTÁRIO DE LUTADORES (TETO NV. 250)</div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span id="inv-equipped-count" style="color:#55d6ff; font-weight:bold;">Equipados: 1 / 3</span>
+                <button class="btn btn-green" style="padding:6px 12px; font-size:12px;" id="modal-btn-equip-best">Equipar Melhores</button>
+                <button class="modal-close" id="modal-close-inv">&times;</button>
+            </div>
+        </div>
+        <div class="modal-content">
+            <div class="inv-grid" id="inv-cards-container"></div>
+        </div>
+    </div>
+
+    <!-- ISLANDS MODAL -->
+    <div class="modal" id="modal-islands">
+        <div class="modal-header">
+            <div class="modal-title">MAPA DAS 10 ILHAS DE ANIME</div>
+            <button class="modal-close" id="modal-close-islands">&times;</button>
+        </div>
+        <div class="modal-content" id="island-rows-container"></div>
+    </div>
+
+    <!-- PASSIVE MACHINE MODAL -->
+    <div class="modal" id="modal-passive">
+        <div class="modal-header">
+            <div class="modal-title" id="passive-modal-title">MÁQUINA DE PASSIVAS</div>
+            <button class="modal-close" id="modal-close-passive">&times;</button>
+        </div>
+        <div class="modal-content">
+            <div class="passive-layout">
+                <div class="passive-list-col" id="passive-fighters-container"></div>
+                <div class="passive-details-col">
+                    <div id="passive-details-view" style="display:flex; flex-direction:column; gap:6px;">
+                        <h3 id="p-detail-name" style="font-size:18px;">Selecione um lutador</h3>
+                        <div id="p-detail-level" style="color:#55d6ff; font-size:13px;">Nível: -</div>
+                        <div id="p-detail-dps" style="color:#f1c40f; font-size:14px; font-weight:bold;">DPS: -</div>
+                        <div id="p-detail-passive" style="font-size:14px; font-weight:bold; margin-top:4px;">Passiva: -</div>
+                        <div id="p-detail-desc" style="font-size:12px; color:#bdc3c7;">-</div>
+                    </div>
+                    <div class="passive-odds-box">
+                        <b style="color:#fff;">Chances de Rolagem:</b><br>
+                        • [Comum] 50% &nbsp; • [Raro] 30% &nbsp; • [Épico] 13%<br>
+                        • [Lendário] 6% &nbsp; • [Mítico] 1%
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div id="p-cost-text" style="font-size:13px; text-align:center; color:#55d6ff;">Custo: -</div>
+                        <button class="btn btn-yellow" id="btn-roll-passive" style="width:100%; padding:12px; font-size:15px; font-weight:bold; color:#f1c40f; border-color:#f1c40f;">★ ROLAR NOVA PASSIVA ★</button>
+                        <div id="p-result-toast" style="min-height:28px; text-align:center; font-size:13px; font-weight:bold;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- SOUND EFFECTS (Web Audio API & Bamboo Hit Audio) --- */
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let bambooHitBuffer = null;
+        const BAMBOO_HIT_B64 = "data:audio/mp3;base64,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";
+        const bambooAudioPool = [];
+        const POOL_SIZE = 8;
+        for (let i = 0; i < POOL_SIZE; i++) {
+            const a = new Audio();
+            a.src = 'bamboo-hit.mp3';
+            bambooAudioPool.push(a);
+        }
+        let poolIndex = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+                loadBambooBuffer();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        async function loadBambooBuffer() {
+            if (bambooHitBuffer || !audioCtx) return;
+            try {
+                let response;
+                try {
+                    response = await fetch('bamboo-hit.mp3');
+                    if (!response.ok) throw new Error();
+                } catch (e) {
+                    response = await fetch(BAMBOO_HIT_B64);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                bambooHitBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            } catch (err) {
+                console.warn('Fallback para Audio Pool:', err);
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+
+                if (type === 'hit') {
+                    // Som oficial Bamboo Hit quando os bonecos causam dano
+                    if (audioCtx && bambooHitBuffer) {
+                        const source = audioCtx.createBufferSource();
+                        source.buffer = bambooHitBuffer;
+                        source.playbackRate.value = 0.95 + Math.random() * 0.1;
+                        const gain = audioCtx.createGain();
+                        gain.gain.value = 0.55;
+                        source.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        source.start(0);
+                        return;
+                    }
+                    if (bambooAudioPool.length > 0) {
+                        const a = bambooAudioPool[poolIndex];
+                        poolIndex = (poolIndex + 1) % bambooAudioPool.length;
+                        a.currentTime = 0;
+                        a.play().catch(() => {});
+                        return;
+                    }
+                }
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'coin') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587, now);
+                    osc.frequency.setValueAtTime(880, now + 0.06);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'gacha' || type === 'reroll') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+                    osc.frequency.exponentialRampToValueAtTime(1320, now + 0.35);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'jump') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(320, now + 0.12);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.12);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                }
+            } catch (e) {}
+        }
+
+        /* --- 10 ISLANDS & BALANCE DATA (Exact match to IslandData.gd) --- */
+        const RARITY_COMMON = "Comum";
+        const RARITY_RARE = "Raro";
+        const RARITY_EPIC = "Épico";
+        const RARITY_LEGENDARY = "Lendário";
+        const RARITY_MYTHIC = "Mítico";
+
+        const RARITY_COLORS = {
+            [RARITY_COMMON]: "#bdc3c7",
+            [RARITY_RARE]: "#3498db",
+            [RARITY_EPIC]: "#9b59b6",
+            [RARITY_LEGENDARY]: "#f1c40f",
+            [RARITY_MYTHIC]: "#e74c3c"
+        };
+
+        const PASSIVES = {
+            "none": { id: "none", name: "Nenhuma", rarity: "Nenhuma", dps_mult: 1.0, atk_speed_mult: 1.0, coin_bonus: 0.0, xp_bonus: 0.0, description: "Sem efeitos adicionais" },
+            "ataque_1": { id: "ataque_1", name: "Ataque I", rarity: RARITY_COMMON, dps_mult: 1.10, atk_speed_mult: 1.0, coin_bonus: 0.0, xp_bonus: 0.0, description: "+10% Dano" },
+            "agilidade_1": { id: "agilidade_1", name: "Agilidade I", rarity: RARITY_COMMON, dps_mult: 1.0, atk_speed_mult: 1.10, coin_bonus: 0.0, xp_bonus: 0.0, description: "+10% Vel. de Ataque" },
+            "ataque_2": { id: "ataque_2", name: "Ataque II", rarity: RARITY_RARE, dps_mult: 1.25, atk_speed_mult: 1.0, coin_bonus: 0.0, xp_bonus: 0.0, description: "+25% Dano" },
+            "magnata_1": { id: "magnata_1", name: "Magnata I", rarity: RARITY_RARE, dps_mult: 1.0, atk_speed_mult: 1.0, coin_bonus: 0.35, xp_bonus: 0.0, description: "+35% Moedas ganhas" },
+            "guerreiro_feroz": { id: "guerreiro_feroz", name: "Guerreiro Feroz", rarity: RARITY_EPIC, dps_mult: 1.60, atk_speed_mult: 1.0, coin_bonus: 0.0, xp_bonus: 0.0, description: "+60% Dano" },
+            "estudioso": { id: "estudioso", name: "Estudioso", rarity: RARITY_EPIC, dps_mult: 1.0, atk_speed_mult: 1.0, coin_bonus: 0.0, xp_bonus: 0.75, description: "+75% XP ganho por abate" },
+            "destruidor": { id: "destruidor", name: "Destruidor", rarity: RARITY_LEGENDARY, dps_mult: 2.30, atk_speed_mult: 1.0, coin_bonus: 0.0, xp_bonus: 0.0, description: "+130% Dano" },
+            "divindade_celestial": { id: "divindade_celestial", name: "Divindade Celestial", rarity: RARITY_MYTHIC, dps_mult: 4.00, atk_speed_mult: 1.40, coin_bonus: 1.00, xp_bonus: 0.0, description: "+300% Dano, +40% Vel. Ataque, +100% Moedas" }
+        };
+
+        const ISLANDS = {
+            1: {
+                id: 1, name: "Vila da Folha (Naruto)", anime: "Naruto",
+                currency_id: "ninja_yen", currency_name: "Ienes Ninja",
+                mob_name: "Ninja Renegado", mob_hp: 100, mob_drop: 20, mob_xp: 15,
+                boss_name: "Chefe Madara Uchiha", boss_hp: 1000, boss_drop: 100, boss_xp: 75,
+                capsule_cost: 100, reroll_cost: 50, unlock_cost: 0, unlock_curr_id: "", unlock_curr_name: "Gratuito",
+                ground_color: 0x3d7e3d, z_pos: 0,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Clone de Naruto", dps: 25, color: 0xf39c12 },
+                    [RARITY_RARE]: { name: "Sasuke Genin", dps: 65, color: 0x2980b9 },
+                    [RARITY_EPIC]: { name: "Kakashi do Sharingan", dps: 160, color: 0x7f8c8d },
+                    [RARITY_LEGENDARY]: { name: "Itachi Akatsuki", dps: 420, color: 0xc0392b },
+                    [RARITY_MYTHIC]: { name: "Naruto Modo Sábio", dps: 1250, color: 0xf1c40f }
+                }
+            },
+            2: {
+                id: 2, name: "Reino de Liones (Nanatsu no Taizai)", anime: "Nanatsu no Taizai",
+                currency_id: "liones_coins", currency_name: "Moedas de Liones",
+                mob_name: "Cavaleiro Sagrado", mob_hp: 500, mob_drop: 120, mob_xp: 50,
+                boss_name: "Chefe Rei Demônio", boss_hp: 5000, boss_drop: 600, boss_xp: 250,
+                capsule_cost: 600, reroll_cost: 300, unlock_cost: 1000, unlock_curr_id: "ninja_yen", unlock_curr_name: "Ienes Ninja",
+                ground_color: 0x2c6b4f, z_pos: -500,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Diane Gigante", dps: 130, color: 0xb5651d },
+                    [RARITY_RARE]: { name: "Ban da Ganância", dps: 320, color: 0xc0392b },
+                    [RARITY_EPIC]: { name: "King Rei das Fadas", dps: 800, color: 0x27ae60 },
+                    [RARITY_LEGENDARY]: { name: "Meliodas Fúria Dragão", dps: 2200, color: 0x8e44ad },
+                    [RARITY_MYTHIC]: { name: "Escanor O Todo-Poderoso", dps: 6500, color: 0xf39c12 }
+                }
+            },
+            3: {
+                id: 3, name: "Região dos Treinadores (Pokémon)", anime: "Pokémon",
+                currency_id: "pokedollars", currency_name: "Pokédólares",
+                mob_name: "Equipe Rocket", mob_hp: 2500, mob_drop: 700, mob_xp: 180,
+                boss_name: "Chefe Mewtwo Armadurado", boss_hp: 25000, boss_drop: 3500, boss_xp: 900,
+                capsule_cost: 3500, reroll_cost: 1750, unlock_cost: 5000, unlock_curr_id: "liones_coins", unlock_curr_name: "Moedas de Liones",
+                ground_color: 0x489635, z_pos: -1000,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Pikachu Trovão", dps: 700, color: 0xf1c40f },
+                    [RARITY_RARE]: { name: "Charizard Chamas", dps: 1750, color: 0xe67e22 },
+                    [RARITY_EPIC]: { name: "Lucario da Aura", dps: 4400, color: 0x2980b9 },
+                    [RARITY_LEGENDARY]: { name: "Mewtwo Psíquico", dps: 12000, color: 0x9b59b6 },
+                    [RARITY_MYTHIC]: { name: "Rayquaza Celestial", dps: 35000, color: 0x2ecc71 }
+                }
+            },
+            4: {
+                id: 4, name: "Grande Rota (One Piece)", anime: "One Piece",
+                currency_id: "berries", currency_name: "Berries",
+                mob_name: "Marujo da Marinha", mob_hp: 12000, mob_drop: 4000, mob_xp: 600,
+                boss_name: "Chefe Kaido Rei das Feras", boss_hp: 120000, boss_drop: 20000, boss_xp: 3000,
+                capsule_cost: 20000, reroll_cost: 10000, unlock_cost: 25000, unlock_curr_id: "pokedollars", unlock_curr_name: "Pokédólares",
+                ground_color: 0xd4b872, z_pos: -1500,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Usopp Deus Atirador", dps: 3500, color: 0xd4ac0d },
+                    [RARITY_RARE]: { name: "Sanji Perna Negra", dps: 8500, color: 0x2c3e50 },
+                    [RARITY_EPIC]: { name: "Zoro Três Espadas", dps: 22000, color: 0x196f3d },
+                    [RARITY_LEGENDARY]: { name: "Luffy Snakeman", dps: 58000, color: 0xe74c3c },
+                    [RARITY_MYTHIC]: { name: "Luffy Gear 5 Deus do Sol", dps: 170000, color: 0xffffff }
+                }
+            },
+            5: {
+                id: 5, name: "Academia U.A. (Boku no Hero)", anime: "Boku no Hero",
+                currency_id: "hero_credits", currency_name: "Créditos Heroicos",
+                mob_name: "Nomu Guerreiro", mob_hp: 60000, mob_drop: 24000, mob_xp: 2200,
+                boss_name: "Chefe All For One", boss_hp: 600000, boss_drop: 120000, boss_xp: 11000,
+                capsule_cost: 120000, reroll_cost: 60000, unlock_cost: 150000, unlock_curr_id: "berries", unlock_curr_name: "Berries",
+                ground_color: 0x5a6d7c, z_pos: -2000,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Deku Full Cowl", dps: 18000, color: 0x1abc9c },
+                    [RARITY_RARE]: { name: "Bakugo Explosão Total", dps: 45000, color: 0xd35400 },
+                    [RARITY_EPIC]: { name: "Todoroki Fogo e Gelo", dps: 110000, color: 0x3498db },
+                    [RARITY_LEGENDARY]: { name: "Endeavor Chamas", dps: 300000, color: 0xc0392b },
+                    [RARITY_MYTHIC]: { name: "All Might Símbolo Paz", dps: 900000, color: 0xf1c40f }
+                }
+            },
+            6: {
+                id: 6, name: "Estádio Egoísta (Blue Lock)", anime: "Blue Lock",
+                currency_id: "ego_points", currency_name: "Pontos Ego",
+                mob_name: "Zagueiro Holográfico", mob_hp: 300000, mob_drop: 140000, mob_xp: 8500,
+                boss_name: "Chefe Noel Noa - Atacante Mundial", boss_hp: 3000000, boss_drop: 700000, boss_xp: 42500,
+                capsule_cost: 700000, reroll_cost: 350000, unlock_cost: 900000, unlock_curr_id: "hero_credits", unlock_curr_name: "Créditos Heroicos",
+                ground_color: 0x1a4568, z_pos: -2500,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Bachira Monstro", dps: 90000, color: 0xf39c12 },
+                    [RARITY_RARE]: { name: "Chigiri Pantera", dps: 220000, color: 0xe91e63 },
+                    [RARITY_EPIC]: { name: "Barou O Rei do Campo", dps: 550000, color: 0x880e4f },
+                    [RARITY_LEGENDARY]: { name: "Nagi Gênio Domínio", dps: 1500000, color: 0xbdc3c7 },
+                    [RARITY_MYTHIC]: { name: "Isagi Metavisão Máxima", dps: 4500000, color: 0x00ff88 }
+                }
+            },
+            7: {
+                id: 7, name: "Ringue Kamogawa (Hajime no Ippo)", anime: "Hajime no Ippo",
+                currency_id: "gold_gloves", currency_name: "Luvas de Ouro",
+                mob_name: "Boxeador Rank 1", mob_hp: 1500000, mob_drop: 800000, mob_xp: 35000,
+                boss_name: "Chefe Ricardo Martinez Invicto", boss_hp: 15000000, boss_drop: 4000000, boss_xp: 175000,
+                capsule_cost: 4000000, reroll_cost: 2000000, unlock_cost: 5000000, unlock_curr_id: "ego_points", unlock_curr_name: "Pontos Ego",
+                ground_color: 0x826445, z_pos: -3000,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Aoki Golpe Duplo", dps: 450000, color: 0xe67e22 },
+                    [RARITY_RARE]: { name: "Kimura Dragão Branco", dps: 1100000, color: 0x2980b9 },
+                    [RARITY_EPIC]: { name: "Sendo Tigre de Naniwa", dps: 2800000, color: 0xd35400 },
+                    [RARITY_LEGENDARY]: { name: "Takamura Campeão", dps: 7500000, color: 0xf1c40f },
+                    [RARITY_MYTHIC]: { name: "Ippo Dempsey Roll Supremo", dps: 22000000, color: 0x00d2d3 }
+                }
+            },
+            8: {
+                id: 8, name: "Planeta Namekusei (Dragon Ball Z)", anime: "Dragon Ball Z",
+                currency_id: "namek_spheres", currency_name: "Esferas de Namek",
+                mob_name: "Soldado de Freeza", mob_hp: 8000000, mob_drop: 5000000, mob_xp: 150000,
+                boss_name: "Chefe Imperador Freeza 100%", boss_hp: 80000000, boss_drop: 25000000, boss_xp: 750000,
+                capsule_cost: 25000000, reroll_cost: 12500000, unlock_cost: 30000000, unlock_curr_id: "gold_gloves", unlock_curr_name: "Luvas de Ouro",
+                ground_color: 0x3d7560, z_pos: -3500,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Piccolo Guerreiro Namek", dps: 2500000, color: 0x27ae60 },
+                    [RARITY_RARE]: { name: "Vegeta Príncipe Saiyajin", dps: 6000000, color: 0x1f3a93 },
+                    [RARITY_EPIC]: { name: "Trunks Espada Futuro", dps: 15000000, color: 0x4a235a },
+                    [RARITY_LEGENDARY]: { name: "Gohan SSJ2 Relâmpago", dps: 40000000, color: 0xf7dc6f },
+                    [RARITY_MYTHIC]: { name: "Goku Super Saiyajin", dps: 120000000, color: 0xf39c12 }
+                }
+            },
+            9: {
+                id: 9, name: "Mundo dos Stands (JoJo's Bizarre Adventure)", anime: "JoJo's Bizarre Adventure",
+                currency_id: "stand_arrows", currency_name: "Flechas de Stand",
+                mob_name: "Usuário de Stand Inimigo", mob_hp: 45000000, mob_drop: 30000000, mob_xp: 700000,
+                boss_name: "Chefe DIO Brando Over Heaven", boss_hp: 450000000, boss_drop: 150000000, boss_xp: 3500000,
+                capsule_cost: 150000000, reroll_cost: 75000000, unlock_cost: 200000000, unlock_curr_id: "namek_spheres", unlock_curr_name: "Esferas de Namek",
+                ground_color: 0x4a2e55, z_pos: -4000,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Polnareff & Silver Chariot", dps: 14000000, color: 0xbdc3c7 },
+                    [RARITY_RARE]: { name: "Josuke & Crazy Diamond", dps: 35000000, color: 0xff6b81 },
+                    [RARITY_EPIC]: { name: "DIO & The World", dps: 90000000, color: 0xf9ca24 },
+                    [RARITY_LEGENDARY]: { name: "Jotaro & Star Platinum", dps: 230000000, color: 0x6c5ce7 },
+                    [RARITY_MYTHIC]: { name: "Giorno Requiem Ouro", dps: 700000000, color: 0xffeaa7 }
+                }
+            },
+            10: {
+                id: 10, name: "Torneio do Poder (Dragon Ball Super)", anime: "Dragon Ball Super",
+                currency_id: "god_energy", currency_name: "Energia dos Deuses",
+                mob_name: "Guerreiro do Multiverso", mob_hp: 300000000, mob_drop: 200000000, mob_xp: 3500000,
+                boss_name: "Chefe Jiren Poder Supremo", boss_hp: 3000000000, boss_drop: 1000000000, boss_xp: 17500000,
+                capsule_cost: 1000000000, reroll_cost: 500000000, unlock_cost: 1500000000, unlock_curr_id: "stand_arrows", unlock_curr_name: "Flechas de Stand",
+                ground_color: 0x1f2e45, z_pos: -4500,
+                fighters: {
+                    [RARITY_COMMON]: { name: "Goku SSJ Deus", dps: 90000000, color: 0xff3838 },
+                    [RARITY_RARE]: { name: "Vegeta SSJ Blue", dps: 220000000, color: 0x17c0eb },
+                    [RARITY_EPIC]: { name: "Gogeta Blue Cósmico", dps: 600000000, color: 0x7158e2 },
+                    [RARITY_LEGENDARY]: { name: "Jiren O Inabalável", dps: 1600000000, color: 0xeb2f06 },
+                    [RARITY_MYTHIC]: { name: "Goku Instinto Superior", dps: 5000000000, color: 0xffffff }
+                }
+            }
+        };
+
+        function formatNum(val) {
+            if (val >= 1e12) return (val / 1e12).toFixed(2) + "T";
+            if (val >= 1e9) return (val / 1e9).toFixed(2) + "B";
+            if (val >= 1e6) return (val / 1e6).toFixed(2) + "M";
+            if (val >= 1e3) return (val / 1e3).toFixed(1) + "K";
+            return Math.floor(val).toLocaleString();
+        }
+
+        /* --- LEVELING & XP FORMULAS --- */
+        function getXpNeeded(level) {
+            return Math.floor(100 * Math.pow(1.035, level - 1) + (level * 50));
+        }
+
+        function calculateFighterDps(baseDps, level, passiveId) {
+            const pInfo = PASSIVES[passiveId] || PASSIVES['none'];
+            const lvlBonus = 1.0 + (level - 1) * 0.014; // +1.4% damage per level above 1
+            return Math.floor(baseDps * lvlBonus * pInfo.dps_mult);
+        }
+
+        function calculateFighterAtkSpeed(passiveId) {
+            const pInfo = PASSIVES[passiveId] || PASSIVES['none'];
+            return pInfo.atk_speed_mult || 1.0;
+        }
+
+        function rollRandomPassive() {
+            const roll = Math.random();
+            let tier = RARITY_COMMON;
+            if (roll < 0.01) tier = RARITY_MYTHIC;
+            else if (roll < 0.07) tier = RARITY_LEGENDARY;
+            else if (roll < 0.20) tier = RARITY_EPIC;
+            else if (roll < 0.50) tier = RARITY_RARE;
+
+            const pool = Object.values(PASSIVES).filter(p => p.rarity === tier);
+            const chosen = pool[Math.floor(Math.random() * pool.length)];
+            return chosen.id;
+        }
+
+        /* --- GAME STATE & LOCALSTORAGE --- */
+        let state = {
+            currencies: { "ninja_yen": 100 },
+            unlocked_islands: [1],
+            current_island: 1,
+            inventory: [
+                { id: "starter_01", name: "Clone de Naruto", rarity: RARITY_COMMON, base_dps: 25, dps: 25, level: 1, xp: 0, passive_id: "none", color: 0xf39c12 }
+            ],
+            equipped_ids: ["starter_01"]
+        };
+
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem("anime_fighters_save");
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.inventory && parsed.equipped_ids) {
+                        state = parsed;
+                        // Ensure all fighters have new XP & passive fields
+                        state.inventory.forEach(f => {
+                            if (f.level === undefined) f.level = 1;
+                            if (f.xp === undefined) f.xp = 0;
+                            if (!f.passive_id) f.passive_id = "none";
+                            if (!f.base_dps) f.base_dps = f.dps || 25;
+                            f.dps = calculateFighterDps(f.base_dps, f.level, f.passive_id);
+                        });
+                    }
+                }
+            } catch(e) {}
+        }
+        function saveGame() {
+            try {
+                localStorage.setItem("anime_fighters_save", JSON.stringify(state));
+                showNotification("Jogo salvo com sucesso!", "#2ecc71");
+            } catch(e) {}
+        }
+        loadGame();
+
+        /* --- THREE.JS SCENE SETUP --- */
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a2436);
+        scene.fog = new THREE.Fog(0x1a2436, 60, 220);
+
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xfffaed, 0.7);
+        dirLight.position.set(30, 60, 20);
+        scene.add(dirLight);
+
+        /* --- BUILD ALL 10 EXPANSIVE ISOLATED ISLANDS --- */
+        const islandsGroup = new THREE.Group();
+        scene.add(islandsGroup);
+
+        const islandRoots = {};
+        const mobsList = [];
+        const interactiveStations = []; // Capsules, portals, passive machines
+        const passiveCrystals = [];
+
+        for (let i = 1; i <= 10; i++) {
+            const island = ISLANDS[i];
+            const islRoot = new THREE.Group();
+            islRoot.position.set(0, 0, island.z_pos);
+
+            // 1. Expansive Ground Box (95x95x2)
+            const groundGeo = new THREE.BoxGeometry(95, 2, 95);
+            const groundMat = new THREE.MeshLambertMaterial({ color: island.ground_color });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.position.y = -1;
+            islRoot.add(ground);
+
+            // 4 Grand Corner Watchtowers
+            const pilGeo = new THREE.BoxGeometry(3, 7, 3);
+            const pilMat = new THREE.MeshLambertMaterial({ color: 0x1f2736 });
+            [[-46,-46], [46,-46], [-46,46], [46,46]].forEach(pos => {
+                const pil = new THREE.Mesh(pilGeo, pilMat);
+                pil.position.set(pos[0], 3.5, pos[1]);
+                islRoot.add(pil);
+            });
+
+            // Low-poly perimeter border walls (safety and arena feel)
+            const borderMat = new THREE.MeshLambertMaterial({ color: 0x222d3d });
+            const bNorth = new THREE.Mesh(new THREE.BoxGeometry(92, 1.2, 1), borderMat);
+            bNorth.position.set(0, 0.6, -47);
+            islRoot.add(bNorth);
+
+            const bSouth = new THREE.Mesh(new THREE.BoxGeometry(92, 1.2, 1), borderMat);
+            bSouth.position.set(0, 0.6, 47);
+            islRoot.add(bSouth);
+
+            const bWest = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 92), borderMat);
+            bWest.position.set(-47, 0.6, 0);
+            islRoot.add(bWest);
+
+            const bEast = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 92), borderMat);
+            bEast.position.set(47, 0.6, 0);
+            islRoot.add(bEast);
+
+            // 2. Central Island Boss (Positioned at Center 0, 0, 0)
+            const boss = createBoss(i, new THREE.Vector3(0, 0, island.z_pos));
+            mobsList.push(boss);
+
+            // 3. Gacha Capsule (positioned at left wing of 95x95 platform)
+            const capGeo = new THREE.CylinderGeometry(0.85, 0.85, 2.4, 12);
+            const capMat = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+            const cap = new THREE.Mesh(capGeo, capMat);
+            cap.position.set(-28, 1.4, 22);
+            islRoot.add(cap);
+
+            const capPed = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.8, 0.4, 12), new THREE.MeshLambertMaterial({ color: 0x34495e }));
+            capPed.position.set(-28, 0.2, 22);
+            islRoot.add(capPed);
+
+            interactiveStations.push({
+                type: 'capsule',
+                island_id: i,
+                position: new THREE.Vector3(-28, 1.4, island.z_pos + 22),
+                mesh: cap
+            });
+
+            // 4. Passive Machine (Pedestal + Rotating Crystal at -28, 1.0, 8.0)
+            const pmPed = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 0.4, 12), new THREE.MeshLambertMaterial({ color: 0x271f3a }));
+            pmPed.position.set(-28, 0.2, 8);
+            islRoot.add(pmPed);
+
+            const pmCol = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 1.0, 12), new THREE.MeshLambertMaterial({ color: 0x271f3a }));
+            pmCol.position.set(-28, 0.9, 8);
+            islRoot.add(pmCol);
+
+            const crystalGeo = new THREE.OctahedronGeometry(0.7, 0);
+            const crystalMat = new THREE.MeshLambertMaterial({ color: 0x00d2d3, emissive: 0x004d4f });
+            const crystalMesh = new THREE.Mesh(crystalGeo, crystalMat);
+            crystalMesh.position.set(-28, 2.2, 8);
+            islRoot.add(crystalMesh);
+            passiveCrystals.push(crystalMesh);
+
+            interactiveStations.push({
+                type: 'passive_machine',
+                island_id: i,
+                position: new THREE.Vector3(-28, 1.0, island.z_pos + 8),
+                mesh: crystalMesh
+            });
+
+            // 5. Portal to next island (positioned at right wing of 95x95 platform)
+            if (i < 10) {
+                const portGeo = new THREE.TorusGeometry(1.8, 0.3, 8, 16);
+                const portMat = new THREE.MeshLambertMaterial({ color: 0x3498db });
+                const port = new THREE.Mesh(portGeo, portMat);
+                port.position.set(28, 2.2, 22);
+                islRoot.add(port);
+
+                interactiveStations.push({
+                    type: 'portal',
+                    target_island_id: i + 1,
+                    position: new THREE.Vector3(28, 2.2, island.z_pos + 22),
+                    mesh: port
+                });
+            }
+
+            // 6. 3 Standard Mobs per island (generously spaced out on 95x95 platform)
+            const mobOffsets = [[-26, -18], [26, -18], [0, -32]];
+            mobOffsets.forEach((off) => {
+                const mob = createMob(i, new THREE.Vector3(off[0], 0, island.z_pos + off[1]));
+                mobsList.push(mob);
+            });
+
+            islandRoots[i] = islRoot;
+            islandsGroup.add(islRoot);
+        }
+
+        /* --- MOB CREATION --- */
+        function createMob(island_id, spawnPos) {
+            const data = ISLANDS[island_id];
+            const mobRoot = new THREE.Group();
+            mobRoot.position.copy(spawnPos);
+
+            // Body
+            const bodyGeo = new THREE.BoxGeometry(0.9, 1.3, 0.6);
+            const bodyMat = new THREE.MeshLambertMaterial({ color: 0xc0392b });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.9;
+            mobRoot.add(body);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.35, 8, 8);
+            const headMat = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.7;
+            mobRoot.add(head);
+
+            // Selection indicator ring
+            const ringGeo = new THREE.TorusGeometry(0.65, 0.08, 6, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xff3838 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 2.6;
+            ring.visible = false;
+            mobRoot.add(ring);
+
+            scene.add(mobRoot);
+
+            return {
+                root: mobRoot,
+                ring: ring,
+                is_boss: false,
+                island_id: island_id,
+                name: data.mob_name,
+                max_hp: data.mob_hp,
+                current_hp: data.mob_hp,
+                drop: data.mob_drop,
+                xp: data.mob_xp,
+                currency_id: data.currency_id,
+                currency_name: data.currency_name,
+                spawn_pos: spawnPos.clone(),
+                patrol_target: spawnPos.clone(),
+                patrol_timer: 0,
+                is_dead: false,
+                respawn_timer: 0
+            };
+        }
+
+        /* --- CENTRAL BOSS CREATION (1.9x Scale, Distinct Boss Armor & Horns) --- */
+        function createBoss(island_id, spawnPos) {
+            const data = ISLANDS[island_id];
+            const bossRoot = new THREE.Group();
+            bossRoot.position.copy(spawnPos);
+            const scale = 1.9;
+
+            // Grand Boss Body
+            const bodyGeo = new THREE.BoxGeometry(0.9 * scale, 1.3 * scale, 0.6 * scale);
+            const bodyMat = new THREE.MeshLambertMaterial({ color: 0x800020 }); // Dark Crimson
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.9 * scale;
+            bossRoot.add(body);
+
+            // Gold Shoulder Armor
+            const padGeo = new THREE.BoxGeometry(0.35 * scale, 0.35 * scale, 0.5 * scale);
+            const padMat = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+            const padL = new THREE.Mesh(padGeo, padMat);
+            padL.position.set(-0.55 * scale, 1.4 * scale, 0);
+            bossRoot.add(padL);
+            const padR = new THREE.Mesh(padGeo, padMat);
+            padR.position.set(0.55 * scale, 1.4 * scale, 0);
+            bossRoot.add(padR);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.35 * scale, 8, 8);
+            const headMat = new THREE.MeshLambertMaterial({ color: 0x9b59b6 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.7 * scale;
+            bossRoot.add(head);
+
+            // Boss Horns
+            const hornGeo = new THREE.ConeGeometry(0.16 * scale, 0.45 * scale, 4);
+            const hornMat = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+            const horn1 = new THREE.Mesh(hornGeo, hornMat);
+            horn1.position.set(-0.25 * scale, 2.1 * scale, 0);
+            horn1.rotation.z = 0.3;
+            bossRoot.add(horn1);
+            const horn2 = new THREE.Mesh(hornGeo, hornMat);
+            horn2.position.set(0.25 * scale, 2.1 * scale, 0);
+            horn2.rotation.z = -0.3;
+            bossRoot.add(horn2);
+
+            // Selection indicator ring
+            const ringGeo = new THREE.TorusGeometry(0.95 * scale, 0.12, 6, 16);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xff0044 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 2.8 * scale;
+            ring.visible = false;
+            bossRoot.add(ring);
+
+            scene.add(bossRoot);
+
+            return {
+                root: bossRoot,
+                ring: ring,
+                is_boss: true,
+                island_id: island_id,
+                name: data.boss_name,
+                max_hp: data.boss_hp,
+                current_hp: data.boss_hp,
+                drop: data.boss_drop, // Exact 2x Drop
+                xp: data.boss_xp,     // Exact 5x XP
+                currency_id: data.currency_id,
+                currency_name: data.currency_name,
+                spawn_pos: spawnPos.clone(),
+                patrol_target: spawnPos.clone(),
+                patrol_timer: 0,
+                is_dead: false,
+                respawn_timer: 0
+            };
+        }
+
+        /* --- PLAYER SETUP --- */
+        const playerRoot = new THREE.Group();
+        playerRoot.position.set(0, 0, 25);
+        scene.add(playerRoot);
+
+        // Body
+        const pBodyGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.4, 8);
+        const pBodyMat = new THREE.MeshLambertMaterial({ color: 0x3498db });
+        const pBody = new THREE.Mesh(pBodyGeo, pBodyMat);
+        pBody.position.y = 0.8;
+        playerRoot.add(pBody);
+
+        // Head
+        const pHeadGeo = new THREE.SphereGeometry(0.32, 8, 8);
+        const pHeadMat = new THREE.MeshLambertMaterial({ color: 0xfad390 });
+        const pHead = new THREE.Mesh(pHeadGeo, pHeadMat);
+        pHead.position.y = 1.6;
+        playerRoot.add(pHead);
+
+        // Visor
+        const pVisor = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.1), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+        pVisor.position.set(0, 1.6, -0.32);
+        playerRoot.add(pVisor);
+
+        // Camera Pivot & Orbit
+        let camYaw = 0;
+        let camPitch = 0.35;
+        let camDist = 7.0;
+
+        /* --- PETS / FIGHTERS --- */
+        const petsGroup = new THREE.Group();
+        scene.add(petsGroup);
+        const petMeshes = [];
+
+        function updateFighterMeshes() {
+            // Remove old
+            petMeshes.forEach(p => petsGroup.remove(p.root));
+            petMeshes.length = 0;
+
+            const equipped = state.inventory.filter(f => state.equipped_ids.includes(f.id));
+            equipped.forEach((f, idx) => {
+                const root = new THREE.Group();
+                const sphere = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.35, 10, 10),
+                    new THREE.MeshLambertMaterial({ color: f.color || 0xf1c40f })
+                );
+                root.add(sphere);
+                petsGroup.add(root);
+
+                const atkSpeed = calculateFighterAtkSpeed(f.passive_id);
+                petMeshes.push({
+                    root: root,
+                    data: f,
+                    index: idx,
+                    total: equipped.length,
+                    dps: f.dps,
+                    attack_interval: 0.4 / Math.max(0.1, atkSpeed),
+                    attack_timer: 0
+                });
+            });
+            updateHUD();
+        }
+
+        /* --- INPUT HANDLING, SPRINT & MOBILE CONTROLS --- */
+        const keys = {};
+        let isRightMouseDown = false;
+        let prevMousePos = { x: 0, y: 0 };
+        let isSprinting = false;
+        let currentTarget = null;
+        let playerVelY = 0;
+        let isGrounded = true;
+
+        /* MOBILE CONTROLS STATE */
+        let mobileSprintActive = false;
+        let autoTargetMode = false;
+        let joystickVector = { x: 0, y: 0 };
+        let joystickTouchId = null;
+        let joystickStart = { x: 0, y: 0 };
+        const JOYSTICK_MAX_RADIUS = 42;
+        let lastTouchEndTime = 0;
+
+        const mobileControlsContainer = document.getElementById('mobile-controls-container');
+        const joystickBase = document.getElementById('joystick-base');
+        const joystickStick = document.getElementById('joystick-stick');
+        const joystickZone = document.getElementById('joystick-zone');
+        const mobileBtnJump = document.getElementById('mobile-btn-jump');
+        const mobileBtnSprint = document.getElementById('mobile-btn-sprint');
+        const mobileBtnInteract = document.getElementById('mobile-btn-interact');
+        const mobileBtnTarget = document.getElementById('mobile-btn-target');
+        const mobileBtnAuto = document.getElementById('mobile-btn-auto');
+        const mobileBtnCamera = document.getElementById('mobile-btn-camera');
+
+        let isMobileUser = false;
+
+        function detectIsMobile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mobile') === '1') return true;
+            if (urlParams.get('pc') === '1') return false;
+            const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
+            const isIPadOS = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            return Boolean(isMobileUA || isIPadOS);
+        }
+
+        function updateOrientationClass() {
+            if (window.innerHeight > window.innerWidth) {
+                document.body.classList.add('is-portrait');
+                document.body.classList.remove('is-landscape');
+            } else {
+                document.body.classList.add('is-landscape');
+                document.body.classList.remove('is-portrait');
+            }
+        }
+
+        function applyDeviceMode(mobile) {
+            isMobileUser = Boolean(mobile);
+            if (isMobileUser) {
+                document.body.classList.add('is-mobile');
+                document.body.classList.remove('is-pc');
+                if (mobileControlsContainer) mobileControlsContainer.style.display = 'block';
+            } else {
+                document.body.classList.add('is-pc');
+                document.body.classList.remove('is-mobile');
+                if (mobileControlsContainer) mobileControlsContainer.style.display = 'none';
+            }
+            updateOrientationClass();
+        }
+
+        function isMobileOrTouch() {
+            return isMobileUser;
+        }
+
+        function findAndSetNearestMob() {
+            const aliveMobs = mobsList.filter(m => !m.is_dead && m.island_id === state.current_island);
+            if (aliveMobs.length > 0) {
+                let closest = null;
+                let minDist = Infinity;
+                aliveMobs.forEach(m => {
+                    const d = playerRoot.position.distanceTo(m.root.position);
+                    if (d < minDist) {
+                        minDist = d;
+                        closest = m;
+                    }
+                });
+                if (closest) setTarget(closest);
+                else clearTarget();
+            } else {
+                clearTarget();
+            }
+        }
+
+        function toggleAutoTarget() {
+            autoTargetMode = !autoTargetMode;
+            if (mobileBtnAuto) mobileBtnAuto.classList.toggle('btn-active', autoTargetMode);
+            if (autoTargetMode) {
+                showNotification("⚔️ Auto-Farm ATIVADO! (Mirando inimigos)", "#2ecc71");
+                if (!currentTarget || currentTarget.is_dead) findAndSetNearestMob();
+            } else {
+                showNotification("Auto-Farm Desativado", "#bdc3c7");
+            }
+            if (navigator.vibrate) navigator.vibrate(15);
+        }
+
+        function resetCamera() {
+            camYaw = playerRoot.rotation.y + Math.PI;
+            camPitch = 0.25;
+            camDist = 8.0;
+            if (navigator.vibrate) navigator.vibrate(10);
+            showNotification("Câmera centralizada!", "#55d6ff");
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+                else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            }
+        }
+
+        function setupMobileControls() {
+            // Aplica estado de dispositivo (PC ou Mobile)
+            applyDeviceMode(detectIsMobile());
+
+            // Desbloqueio global de áudio na primeira interação do jogador
+            ['touchstart', 'mousedown', 'keydown'].forEach(evt => {
+                window.addEventListener(evt, () => {
+                    initAudio();
+                }, { passive: true, once: true });
+            });
+
+            // 1. Virtual Joystick Dinâmico
+            if (joystickZone) {
+                joystickZone.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    if (joystickTouchId !== null) return;
+                    const touch = e.changedTouches[0];
+                    joystickTouchId = touch.identifier;
+
+                    const zoneRect = joystickZone.getBoundingClientRect();
+                    const localX = touch.clientX - zoneRect.left;
+                    const localY = touch.clientY - zoneRect.top;
+
+                    if (joystickBase) {
+                        joystickBase.style.left = (localX - 62) + 'px';
+                        joystickBase.style.top = (localY - 62) + 'px';
+                        joystickBase.style.bottom = 'auto';
+                        joystickBase.style.opacity = '1.0';
+                    }
+
+                    joystickStart = { x: touch.clientX, y: touch.clientY };
+                    updateJoystick(touch.clientX, touch.clientY);
+                }, { passive: false });
+
+                window.addEventListener('touchmove', e => {
+                    if (joystickTouchId === null) return;
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === joystickTouchId) {
+                            e.preventDefault();
+                            updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+                            break;
+                        }
+                    }
+                }, { passive: false });
+
+                function stopJoystick() {
+                    joystickTouchId = null;
+                    joystickVector = { x: 0, y: 0 };
+                    if (joystickStick) joystickStick.style.transform = 'translate(0px, 0px)';
+                    if (joystickBase) {
+                        joystickBase.style.left = '26px';
+                        joystickBase.style.bottom = '26px';
+                        joystickBase.style.top = 'auto';
+                        joystickBase.style.opacity = '0.65';
+                    }
+                }
+
+                window.addEventListener('touchend', e => {
+                    if (joystickTouchId === null) return;
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === joystickTouchId) {
+                            stopJoystick();
+                            break;
+                        }
+                    }
+                });
+                window.addEventListener('touchcancel', stopJoystick);
+
+                function updateJoystick(cx, cy) {
+                    const dx = cx - joystickStart.x;
+                    const dy = cy - joystickStart.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 4) {
+                        joystickVector = { x: 0, y: 0 };
+                        if (joystickStick) joystickStick.style.transform = 'translate(0px, 0px)';
+                        return;
+                    }
+                    const angle = Math.atan2(dy, dx);
+                    const clampedDist = Math.min(dist, JOYSTICK_MAX_RADIUS);
+                    const stickX = Math.cos(angle) * clampedDist;
+                    const stickY = Math.sin(angle) * clampedDist;
+
+                    if (joystickStick) joystickStick.style.transform = `translate(${stickX}px, ${stickY}px)`;
+                    joystickVector = {
+                        x: stickX / JOYSTICK_MAX_RADIUS,
+                        y: stickY / JOYSTICK_MAX_RADIUS
+                    };
+                }
+            }
+
+            // 2. Botões de Ação Mobile
+            if (mobileBtnJump) {
+                mobileBtnJump.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    if (isGrounded) {
+                        playerVelY = 8.5;
+                        isGrounded = false;
+                        playSound('jump');
+                        if (navigator.vibrate) navigator.vibrate(12);
+                    }
+                }, { passive: false });
+            }
+
+            if (mobileBtnSprint) {
+                mobileBtnSprint.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    mobileSprintActive = !mobileSprintActive;
+                    mobileBtnSprint.classList.toggle('btn-active', mobileSprintActive);
+                    if (navigator.vibrate) navigator.vibrate(15);
+                }, { passive: false });
+            }
+
+            if (mobileBtnInteract) {
+                mobileBtnInteract.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    handleInteract();
+                    if (navigator.vibrate) navigator.vibrate(20);
+                }, { passive: false });
+            }
+
+            if (mobileBtnTarget) {
+                mobileBtnTarget.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    if (currentTarget) {
+                        clearTarget();
+                    } else {
+                        findAndSetNearestMob();
+                    }
+                    if (navigator.vibrate) navigator.vibrate(15);
+                }, { passive: false });
+            }
+
+            if (mobileBtnAuto) {
+                mobileBtnAuto.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    toggleAutoTarget();
+                }, { passive: false });
+            }
+
+            if (mobileBtnCamera) {
+                mobileBtnCamera.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    initAudio();
+                    resetCamera();
+                }, { passive: false });
+            }
+
+            // 3. Rotação Orbital da Câmera (Multi-Touch isolado) e Pinch-to-Zoom
+            let camTouchId = null;
+            let camStartPos = { x: 0, y: 0 };
+            let camPrevPos = { x: 0, y: 0 };
+            let camStartTime = 0;
+            let initialPinchDist = null;
+
+            window.addEventListener('touchstart', e => {
+                initAudio();
+
+                // Verifica pinça com 2 dedos fora da área do joystick
+                const cameraTouches = [];
+                for (let i = 0; i < e.touches.length; i++) {
+                    const t = e.touches[i];
+                    if (t.identifier !== joystickTouchId) {
+                        const el = document.elementFromPoint(t.clientX, t.clientY);
+                        if (!el || (!el.closest('#mobile-actions') && !el.closest('.modal') && !el.closest('#top-bar') && !el.closest('#bottom-bar'))) {
+                            cameraTouches.push(t);
+                        }
+                    }
+                }
+
+                if (cameraTouches.length >= 2) {
+                    initialPinchDist = Math.hypot(
+                        cameraTouches[0].clientX - cameraTouches[1].clientX,
+                        cameraTouches[0].clientY - cameraTouches[1].clientY
+                    );
+                    camTouchId = null;
+                    return;
+                }
+
+                // Toque único para rotação de câmera ou seleção por toque
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const t = e.changedTouches[i];
+                    if (t.identifier === joystickTouchId) continue;
+                    const el = document.elementFromPoint(t.clientX, t.clientY);
+                    if (el && (el.closest('#joystick-zone') || 
+                        el.closest('#mobile-actions') || 
+                        el.closest('.modal') || 
+                        el.closest('#top-bar') || 
+                        el.closest('#bottom-bar') ||
+                        el.closest('#interact-prompt') ||
+                        el.closest('#orientation-hint'))) {
+                        continue;
+                    }
+
+                    if (camTouchId === null) {
+                        camTouchId = t.identifier;
+                        camStartPos = { x: t.clientX, y: t.clientY };
+                        camPrevPos = { x: t.clientX, y: t.clientY };
+                        camStartTime = performance.now();
+                        break;
+                    }
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchmove', e => {
+                // Pinch to Zoom
+                const cameraTouches = [];
+                for (let i = 0; i < e.touches.length; i++) {
+                    const t = e.touches[i];
+                    if (t.identifier !== joystickTouchId) {
+                        cameraTouches.push(t);
+                    }
+                }
+
+                if (cameraTouches.length >= 2 && initialPinchDist !== null) {
+                    const currentDist = Math.hypot(
+                        cameraTouches[0].clientX - cameraTouches[1].clientX,
+                        cameraTouches[0].clientY - cameraTouches[1].clientY
+                    );
+                    const deltaDist = currentDist - initialPinchDist;
+                    camDist = Math.max(3.5, Math.min(16.0, camDist - deltaDist * 0.02));
+                    initialPinchDist = currentDist;
+                    return;
+                }
+
+                // Rotação orbital
+                if (camTouchId !== null) {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const touch = e.changedTouches[i];
+                        if (touch.identifier === camTouchId) {
+                            const dx = touch.clientX - camPrevPos.x;
+                            const dy = touch.clientY - camPrevPos.y;
+                            camYaw -= dx * 0.007;
+                            camPitch = Math.max(-0.5, Math.min(0.8, camPitch - dy * 0.007));
+                            camPrevPos = { x: touch.clientX, y: touch.clientY };
+                            break;
+                        }
+                    }
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchend', e => {
+                lastTouchEndTime = performance.now();
+                if (e.touches.length < 2) initialPinchDist = null;
+
+                if (camTouchId !== null) {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const touch = e.changedTouches[i];
+                        if (touch.identifier === camTouchId) {
+                            const totalDist = Math.hypot(touch.clientX - camStartPos.x, touch.clientY - camStartPos.y);
+                            const duration = performance.now() - camStartTime;
+                            if (totalDist < 16 && duration < 350) {
+                                raycastSelect(touch.clientX, touch.clientY);
+                            }
+                            camTouchId = null;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Tap direto no prompt de interação
+            const pEl = document.getElementById('interact-prompt');
+            if (pEl) {
+                pEl.addEventListener('click', () => { initAudio(); handleInteract(); });
+                pEl.addEventListener('touchstart', e => { e.preventDefault(); initAudio(); handleInteract(); });
+            }
+
+            // Fechar dica de orientação
+            const orientClose = document.getElementById('orient-hint-close');
+            if (orientClose) {
+                orientClose.addEventListener('click', () => {
+                    const hint = document.getElementById('orientation-hint');
+                    if (hint) hint.style.display = 'none';
+                });
+            }
+        }
+        setupMobileControls();
+
+        window.addEventListener('keydown', e => {
+            initAudio();
+            keys[e.code] = true;
+            if (e.code === 'KeyI') toggleModal('modal-inventory');
+            if (e.code === 'KeyM') toggleModal('modal-islands');
+            if (e.code === 'KeyP') toggleModal('modal-passive');
+            if (e.code === 'KeyE') handleInteract();
+            if (e.code === 'Escape' || e.code === 'KeyQ') clearTarget();
+            if (e.code === 'Space' && isGrounded) {
+                playerVelY = 8.5;
+                isGrounded = false;
+                playSound('jump');
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            keys[e.code] = false;
+        });
+
+        window.addEventListener('mousedown', e => {
+            if (performance.now() - lastTouchEndTime < 450) return;
+            initAudio();
+            if (e.button === 2) {
+                isRightMouseDown = true;
+                prevMousePos = { x: e.clientX, y: e.clientY };
+            } else if (e.button === 0) {
+                raycastSelect(e.clientX, e.clientY);
+            }
+        });
+
+        window.addEventListener('mouseup', e => {
+            if (e.button === 2) isRightMouseDown = false;
+        });
+
+        window.addEventListener('mousemove', e => {
+            if (isRightMouseDown) {
+                const dx = e.clientX - prevMousePos.x;
+                const dy = e.clientY - prevMousePos.y;
+                camYaw -= dx * 0.006;
+                camPitch = Math.max(-0.5, Math.min(0.8, camPitch - dy * 0.006));
+                prevMousePos = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('wheel', e => {
+            camDist = Math.max(3.5, Math.min(16.0, camDist + e.deltaY * 0.01));
+        });
+
+        window.addEventListener('contextmenu', e => e.preventDefault());
+
+        /* --- RAYCAST SELECT MOB COM SUPORTE MOBILE --- */
+        const raycaster = new THREE.Raycaster();
+        const mouseVec = new THREE.Vector2();
+
+        function raycastSelect(clientX, clientY) {
+            mouseVec.x = (clientX / window.innerWidth) * 2 - 1;
+            mouseVec.y = -(clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouseVec, camera);
+
+            const activeIslandMobs = mobsList.filter(m => !m.is_dead && m.island_id === state.current_island);
+            const mobRoots = activeIslandMobs.map(m => m.root);
+            const intersects = raycaster.intersectObjects(mobRoots, true);
+
+            if (intersects.length > 0) {
+                let hitMobRoot = intersects[0].object;
+                while (hitMobRoot.parent && hitMobRoot.parent !== scene) {
+                    hitMobRoot = hitMobRoot.parent;
+                }
+                const found = activeIslandMobs.find(m => m.root === hitMobRoot);
+                if (found) {
+                    if (currentTarget === found) {
+                        clearTarget();
+                    } else {
+                        setTarget(found);
+                        if (navigator.vibrate) navigator.vibrate(15);
+                    }
+                    return;
+                }
+            }
+
+            // Proximidade na tela para toque touch (tolerância de 55px)
+            let closestMob = null;
+            let minScreenDist = 55;
+            const tempV = new THREE.Vector3();
+            activeIslandMobs.forEach(m => {
+                m.root.getWorldPosition(tempV);
+                tempV.y += m.is_boss ? 1.6 : 0.8;
+                tempV.project(camera);
+                if (tempV.z > 0 && tempV.z < 1) {
+                    const sx = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                    const sy = (-(tempV.y * 0.5) + 0.5) * window.innerHeight;
+                    const dist = Math.hypot(clientX - sx, clientY - sy);
+                    if (dist < minScreenDist) {
+                        minScreenDist = dist;
+                        closestMob = m;
+                    }
+                }
+            });
+
+            if (closestMob) {
+                if (currentTarget === closestMob) {
+                    clearTarget();
+                } else {
+                    setTarget(closestMob);
+                    if (navigator.vibrate) navigator.vibrate(15);
+                }
+            }
+        }
+
+        function setTarget(mob) {
+            if (currentTarget) currentTarget.ring.visible = false;
+            currentTarget = mob;
+            mob.ring.visible = true;
+            document.getElementById('target-panel').style.display = 'block';
+            document.getElementById('target-name').innerText = (mob.is_boss ? "[CHEFE] " : "") + mob.name;
+            document.getElementById('target-name').style.color = mob.is_boss ? "#ff2a55" : "#ff6b6b";
+            if (mobileBtnTarget) mobileBtnTarget.classList.add('btn-active');
+            updateTargetUI();
+        }
+
+        function clearTarget() {
+            if (currentTarget) currentTarget.ring.visible = false;
+            currentTarget = null;
+            document.getElementById('target-panel').style.display = 'none';
+            if (mobileBtnTarget) mobileBtnTarget.classList.remove('btn-active');
+        }
+
+        function updateTargetUI() {
+            if (!currentTarget) return;
+            const pct = Math.max(0, Math.min(100, (currentTarget.current_hp / currentTarget.max_hp) * 100));
+            document.getElementById('target-hp-fill').style.width = pct + '%';
+            document.getElementById('target-hp-num').innerText = `${formatNum(currentTarget.current_hp)} / ${formatNum(currentTarget.max_hp)}`;
+        }
+
+        /* --- DAMAGE NUMBERS POPUP --- */
+        function spawnDamageNumber(pos3D, damage, isBoss) {
+            const screenPos = pos3D.clone().project(camera);
+            const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-(screenPos.y * 0.5) + 0.5) * window.innerHeight;
+
+            const el = document.createElement('div');
+            el.className = 'damage-number';
+            el.innerText = `-${formatNum(damage)}`;
+            el.style.color = isBoss ? '#f1c40f' : '#ff4757';
+            el.style.left = (x + (Math.random() * 30 - 15)) + 'px';
+            el.style.top = (y + (Math.random() * 20 - 10)) + 'px';
+            document.body.appendChild(el);
+
+            setTimeout(() => {
+                el.style.transform = 'translateY(-40px) scale(1.15)';
+                el.style.opacity = '0';
+            }, 20);
+
+            setTimeout(() => el.remove(), 650);
+        }
+
+        /* --- SPRINT STATUS UI --- */
+        const sprintDot = document.getElementById('sprint-active-dot');
+        const sprintLabel = document.getElementById('sprint-label');
+
+        /* --- GAME LOOP --- */
+        let lastTime = performance.now();
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            const delta = Math.min((now - lastTime) / 1000, 0.1);
+            lastTime = now;
+
+            // Animate Passive Crystals
+            passiveCrystals.forEach(c => {
+                c.rotation.y += delta * 1.6;
+                c.position.y = 2.2 + Math.sin(now * 0.003) * 0.12;
+            });
+
+            // 1. SPRINT MECHANIC: Shift key detection ou Mobile Sprint
+            isSprinting = keys['ShiftLeft'] || keys['ShiftRight'] || mobileSprintActive;
+            sprintDot.className = isSprinting ? 'active' : '';
+            sprintLabel.innerText = isSprinting ? 'ATIVADO (2x Velocidade)' : 'Desativado [SHIFT]';
+            sprintLabel.style.color = isSprinting ? '#2ecc71' : '#fff';
+
+            const moveSpeed = isSprinting ? 24.0 : 12.0;
+
+            // 2. PLAYER MOVEMENT (Teclado + Virtual Joystick Mobile)
+            let moveX = 0;
+            let moveZ = 0;
+            if (keys['KeyW'] || keys['ArrowUp']) moveZ -= 1;
+            if (keys['KeyS'] || keys['ArrowDown']) moveZ += 1;
+            if (keys['KeyA'] || keys['ArrowLeft']) moveX -= 1;
+            if (keys['KeyD'] || keys['ArrowRight']) moveX += 1;
+
+            if (Math.abs(joystickVector.x) > 0.05 || Math.abs(joystickVector.y) > 0.05) {
+                moveX += joystickVector.x;
+                moveZ += joystickVector.y;
+            }
+
+            const len = Math.hypot(moveX, moveZ);
+            if (len > 0.001) {
+                moveX /= len;
+                moveZ /= len;
+
+                // Move relative to camera yaw
+                const sinY = Math.sin(camYaw);
+                const cosY = Math.cos(camYaw);
+                const worldX = moveX * cosY + moveZ * sinY;
+                const worldZ = -moveX * sinY + moveZ * cosY;
+
+                playerRoot.position.x += worldX * moveSpeed * delta;
+                playerRoot.position.z += worldZ * moveSpeed * delta;
+
+                // Turn player facing direction
+                playerRoot.rotation.y = Math.atan2(-worldX, -worldZ);
+
+                // Run bobbing
+                const bobFreq = isSprinting ? 22 : 14;
+                pBody.position.y = 0.8 + Math.abs(Math.sin(now * 0.001 * bobFreq)) * (isSprinting ? 0.14 : 0.06);
+            } else {
+                pBody.position.y = 0.8;
+            }
+
+            // Gravity & Jump
+            if (!isGrounded) {
+                playerVelY -= 20.0 * delta;
+                playerRoot.position.y += playerVelY * delta;
+                if (playerRoot.position.y <= 0) {
+                    playerRoot.position.y = 0;
+                    playerVelY = 0;
+                    isGrounded = true;
+                }
+            }
+
+            // 3. CAMERA FOLLOW (Dynamic FOV on Sprint)
+            const targetFOV = (isSprinting && len > 0.1) ? 82 : 70;
+            camera.fov += (targetFOV - camera.fov) * delta * 6;
+            camera.updateProjectionMatrix();
+
+            const camX = playerRoot.position.x + Math.sin(camYaw) * Math.cos(camPitch) * camDist;
+            const camY = playerRoot.position.y + Math.sin(camPitch) * camDist + 1.8;
+            const camZ = playerRoot.position.z + Math.cos(camYaw) * Math.cos(camPitch) * camDist;
+            camera.position.set(camX, camY, camZ);
+            camera.lookAt(playerRoot.position.x, playerRoot.position.y + 1.4, playerRoot.position.z);
+
+            // 4. PET FOLLOW & ATTACK LOGIC
+            petMeshes.forEach(pet => {
+                if (currentTarget && !currentTarget.is_dead) {
+                    // Attack State: Dash to target
+                    const angle = (pet.index / Math.max(1, pet.total)) * Math.PI * 2;
+                    const spot = currentTarget.root.position.clone().add(new THREE.Vector3(Math.cos(angle) * (currentTarget.is_boss ? 2.8 : 1.8), 0.4, Math.sin(angle) * (currentTarget.is_boss ? 2.8 : 1.8)));
+                    pet.root.position.lerp(spot, delta * 12);
+                    pet.root.lookAt(currentTarget.root.position);
+
+                    // Continuous DPS attack loop based on attack_interval
+                    const distToMob = pet.root.position.distanceTo(currentTarget.root.position);
+                    const range = currentTarget.is_boss ? 3.8 : 2.5;
+                    if (distToMob < range) {
+                        pet.attack_timer += delta;
+                        if (pet.attack_timer >= pet.attack_interval) {
+                            pet.attack_timer = 0;
+                            const dmg = pet.dps * pet.attack_interval;
+                            currentTarget.current_hp = Math.max(0, currentTarget.current_hp - dmg);
+                            playSound('hit');
+                            spawnDamageNumber(currentTarget.root.position, dmg, currentTarget.is_boss);
+                            updateTargetUI();
+
+                            if (currentTarget.current_hp <= 0) {
+                                killMob(currentTarget);
+                            }
+                        }
+                    }
+                } else {
+                    // Follow State: Smooth triangular formation behind player
+                    let offX = 0, offZ = 2.2;
+                    if (pet.total === 2) {
+                        offX = pet.index === 0 ? -1.8 : 1.8;
+                    } else if (pet.total === 3) {
+                        if (pet.index === 0) { offX = -1.8; offZ = 1.8; }
+                        else if (pet.index === 1) { offX = 1.8; offZ = 1.8; }
+                        else { offX = 0; offZ = 2.8; }
+                    }
+
+                    const sinP = Math.sin(playerRoot.rotation.y);
+                    const cosP = Math.cos(playerRoot.rotation.y);
+                    const wx = offX * cosP - offZ * sinP;
+                    const wz = offX * sinP + offZ * cosP;
+
+                    const desired = playerRoot.position.clone().add(new THREE.Vector3(wx, 0.6 + Math.sin(now * 0.005 + pet.index * 1.5) * 0.15, wz));
+                    pet.root.position.lerp(desired, delta * 8);
+                    pet.root.rotation.y = playerRoot.rotation.y;
+                }
+            });
+
+            // 5. MOBS UPDATE & RESPAWN (Only for current active island)
+            mobsList.forEach(mob => {
+                if (mob.island_id !== state.current_island) {
+                    mob.root.visible = false;
+                    return;
+                }
+                if (mob.is_dead) {
+                    mob.respawn_timer -= delta;
+                    if (mob.respawn_timer <= 0) {
+                        mob.is_dead = false;
+                        mob.current_hp = mob.max_hp;
+                        mob.root.position.copy(mob.spawn_pos);
+                        mob.root.scale.set(1, 1, 1);
+                        mob.root.visible = true;
+                    }
+                } else {
+                    mob.root.visible = true;
+                    if (!mob.is_boss) {
+                        // Small local wander for standard mobs
+                        mob.patrol_timer += delta;
+                        if (mob.patrol_timer > 3) {
+                            mob.patrol_timer = 0;
+                            const ang = Math.random() * Math.PI * 2;
+                            const dist = Math.random() * 2.5;
+                            mob.patrol_target.set(mob.spawn_pos.x + Math.cos(ang) * dist, 0, mob.spawn_pos.z + Math.sin(ang) * dist);
+                        }
+                        mob.root.position.lerp(mob.patrol_target, delta * 1.2);
+                    }
+                }
+            });
+
+            // 6. CHECK INTERACTION PROXIMITY
+            checkInteractionProximity();
+
+            // Auto-Farm Mob Hunter Loop
+            if (autoTargetMode && (!currentTarget || currentTarget.is_dead)) {
+                findAndSetNearestMob();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        /* --- MOB DEATH & DROP (2x Coins for Boss, 5x XP, Leveling loop) --- */
+        function killMob(mob) {
+            mob.is_dead = true;
+            // 15 seconds for Boss, 4 seconds for standard mob
+            mob.respawn_timer = mob.is_boss ? 15.0 : 4.0;
+            mob.root.scale.set(0, 0, 0);
+
+            // Calculate passive multipliers from equipped fighters
+            const equipped = state.inventory.filter(f => state.equipped_ids.includes(f.id));
+            let coinBonus = 0;
+            let xpBonus = 0;
+            equipped.forEach(f => {
+                const p = PASSIVES[f.passive_id] || PASSIVES['none'];
+                coinBonus += (p.coin_bonus || 0);
+                xpBonus += (p.xp_bonus || 0);
+            });
+
+            const finalDrop = Math.floor(mob.drop * (1.0 + coinBonus));
+            const finalXp = Math.floor(mob.xp * (1.0 + xpBonus));
+
+            const currId = mob.currency_id;
+            state.currencies[currId] = (state.currencies[currId] || 0) + finalDrop;
+            playSound('coin');
+
+            const bossPrefix = mob.is_boss ? "👑 CHEFE DERROTADO! " : "";
+            showNotification(`${bossPrefix}+${formatNum(finalDrop)} ${mob.currency_name} | +${formatNum(finalXp)} XP!`, mob.is_boss ? "#e74c3c" : "#f1c40f");
+
+            // Distribute XP to equipped fighters
+            let anyLevelUp = false;
+            equipped.forEach(f => {
+                if (f.level < 250) {
+                    f.xp += finalXp;
+                    while (f.level < 250) {
+                        const req = getXpNeeded(f.level);
+                        if (f.xp >= req) {
+                            f.xp -= req;
+                            f.level += 1;
+                            f.dps = calculateFighterDps(f.base_dps, f.level, f.passive_id);
+                            anyLevelUp = true;
+                            showNotification(`🎉 ${f.name} alcançou o Nível ${f.level}! (+1.4% Dano)`, "#2ecc71");
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            });
+
+            if (anyLevelUp) {
+                updateFighterMeshes();
+                saveGame();
+            }
+
+            updateHUD();
+            if (currentTarget === mob) {
+                if (autoTargetMode) {
+                    findAndSetNearestMob();
+                } else {
+                    clearTarget();
+                }
+            }
+        }
+
+        /* --- INTERACTION PROMPT (Capsule, Portal, Passive Machine) --- */
+        let activeInteract = null;
+        const promptEl = document.getElementById('interact-prompt');
+
+        function checkInteractionProximity() {
+            let found = null;
+            for (let st of interactiveStations) {
+                if (st.island_id !== undefined && st.island_id !== state.current_island) continue;
+                if (st.type === 'portal' && (st.target_island_id - 1) !== state.current_island) continue;
+                const dist = playerRoot.position.distanceTo(st.position);
+                if (dist < 4.5) {
+                    found = st;
+                    break;
+                }
+            }
+            activeInteract = found;
+            if (mobileBtnInteract) {
+                if (activeInteract) {
+                    mobileBtnInteract.classList.add('btn-highlight');
+                } else {
+                    mobileBtnInteract.classList.remove('btn-highlight');
+                }
+            }
+            if (activeInteract) {
+                promptEl.style.display = 'block';
+                if (activeInteract.type === 'capsule') {
+                    const isl = ISLANDS[activeInteract.island_id];
+                    promptEl.innerText = `Cápsula ${isl.name}\n[E] Abrir (${formatNum(isl.capsule_cost)} ${isl.currency_name})`;
+                } else if (activeInteract.type === 'passive_machine') {
+                    const isl = ISLANDS[activeInteract.island_id];
+                    promptEl.innerText = `Máquina de Passivas (${isl.name})\n[E] Rolar Passiva (${formatNum(isl.reroll_cost)} ${isl.currency_name})`;
+                } else if (activeInteract.type === 'portal') {
+                    const targetIsl = ISLANDS[activeInteract.target_island_id];
+                    const isUnlocked = state.unlocked_islands.includes(targetIsl.id);
+                    if (isUnlocked) {
+                        promptEl.innerText = `Portal para: ${targetIsl.name}\n[E] Entrar`;
+                    } else {
+                        promptEl.innerText = `Desbloquear: ${targetIsl.name}\n[E] Custo: ${formatNum(targetIsl.unlock_cost)} ${targetIsl.unlock_curr_name}`;
+                    }
+                }
+            } else {
+                promptEl.style.display = 'none';
+            }
+        }
+
+        function handleInteract() {
+            if (!activeInteract) return;
+            if (activeInteract.type === 'capsule') {
+                pullGacha(activeInteract.island_id);
+            } else if (activeInteract.type === 'passive_machine') {
+                openPassiveModal(activeInteract.island_id);
+            } else if (activeInteract.type === 'portal') {
+                const targetId = activeInteract.target_island_id;
+                const isUnlocked = state.unlocked_islands.includes(targetId);
+                if (isUnlocked) {
+                    teleportToIsland(targetId);
+                } else {
+                    const targetIsl = ISLANDS[targetId];
+                    const curr = state.currencies[targetIsl.unlock_curr_id] || 0;
+                    if (curr >= targetIsl.unlock_cost) {
+                        state.currencies[targetIsl.unlock_curr_id] -= targetIsl.unlock_cost;
+                        state.unlocked_islands.push(targetId);
+                        showNotification(`Nova Ilha Desbloqueada: ${targetIsl.name}!`, "#2ecc71");
+                        teleportToIsland(targetId);
+                        saveGame();
+                    } else {
+                        showNotification("Moedas insuficientes para desbloquear!", "#e74c3c");
+                    }
+                }
+            }
+        }
+
+        /* --- GACHA PULL WITH PROBABILITIES --- */
+        function pullGacha(island_id) {
+            const isl = ISLANDS[island_id];
+            const currentCoins = state.currencies[isl.currency_id] || 0;
+            if (currentCoins < isl.capsule_cost) {
+                showNotification(`Moedas insuficientes! Precisa de ${formatNum(isl.capsule_cost)} ${isl.currency_name}.`, "#e74c3c");
+                return;
+            }
+
+            state.currencies[isl.currency_id] -= isl.capsule_cost;
+
+            // Exact probabilities: Common 60%, Rare 25%, Epic 10%, Legendary 4.5%, Mythic 0.5%
+            const roll = Math.random();
+            let rarity = RARITY_COMMON;
+            if (roll < 0.005) rarity = RARITY_MYTHIC;
+            else if (roll < 0.05) rarity = RARITY_LEGENDARY;
+            else if (roll < 0.15) rarity = RARITY_EPIC;
+            else if (roll < 0.40) rarity = RARITY_RARE;
+
+            const pool = isl.fighters[rarity];
+            const newFighter = {
+                id: "f_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+                name: pool.name,
+                rarity: rarity,
+                base_dps: pool.dps,
+                dps: pool.dps,
+                level: 1,
+                xp: 0,
+                passive_id: "none",
+                color: pool.color
+            };
+
+            state.inventory.push(newFighter);
+            playSound('gacha');
+            showNotification(`Obteve: [${rarity}] ${newFighter.name} (${formatNum(newFighter.dps)} DPS)!`, RARITY_COLORS[rarity]);
+
+            if (state.equipped_ids.length < 3) {
+                state.equipped_ids.push(newFighter.id);
+            }
+            updateFighterMeshes();
+            saveGame();
+        }
+
+        /* --- PASSIVE REROLL MACHINE MODAL --- */
+        let selectedPassiveFighterId = "";
+        let passiveIslandId = 1;
+
+        function openPassiveModal(island_id) {
+            passiveIslandId = island_id || state.current_island;
+            const isl = ISLANDS[passiveIslandId];
+            document.getElementById('passive-modal-title').innerText = `MÁQUINA DE PASSIVAS - ${isl.name.toUpperCase()}`;
+            
+            if (!selectedPassiveFighterId || !state.inventory.find(f => f.id === selectedPassiveFighterId)) {
+                if (state.inventory.length > 0) {
+                    selectedPassiveFighterId = state.inventory[0].id;
+                }
+            }
+            
+            renderPassiveModal();
+            toggleModal('modal-passive');
+        }
+
+        function renderPassiveModal() {
+            const isl = ISLANDS[passiveIslandId];
+            const container = document.getElementById('passive-fighters-container');
+            container.innerHTML = '';
+
+            state.inventory.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'passive-fighter-item' + (f.id === selectedPassiveFighterId ? ' selected' : '');
+                const p = PASSIVES[f.passive_id] || PASSIVES['none'];
+                const pColor = RARITY_COLORS[p.rarity] || '#bdc3c7';
+                item.innerHTML = `
+                    <div style="font-weight:bold; color:${RARITY_COLORS[f.rarity]};">${f.name}</div>
+                    <div style="font-size:11px; color:#55d6ff;">Nv. ${f.level}/250 | DPS: ${formatNum(f.dps)}</div>
+                    <div style="font-size:11px; color:${pColor};">★ ${p.name}</div>
+                `;
+                item.onclick = () => {
+                    selectedPassiveFighterId = f.id;
+                    renderPassiveModal();
+                };
+                container.appendChild(item);
+            });
+
+            // Details View
+            const f = state.inventory.find(x => x.id === selectedPassiveFighterId);
+            if (f) {
+                document.getElementById('p-detail-name').innerText = `${f.name} [${f.rarity}]`;
+                document.getElementById('p-detail-name').style.color = RARITY_COLORS[f.rarity];
+                document.getElementById('p-detail-level').innerText = `Nível: ${f.level} / 250`;
+                document.getElementById('p-detail-dps').innerText = `DPS Total: ${formatNum(f.dps)} (Base: ${formatNum(f.base_dps)})`;
+                
+                const p = PASSIVES[f.passive_id] || PASSIVES['none'];
+                document.getElementById('p-detail-passive').innerText = `Passiva Atual: [${p.rarity}] ${p.name}`;
+                document.getElementById('p-detail-passive').style.color = RARITY_COLORS[p.rarity] || '#fff';
+                document.getElementById('p-detail-desc').innerText = `Efeito: ${p.description}`;
+
+                const cost = isl.reroll_cost;
+                const userCoins = state.currencies[isl.currency_id] || 0;
+                const costEl = document.getElementById('p-cost-text');
+                costEl.innerText = `Custo: ${formatNum(cost)} ${isl.currency_name} (Você tem: ${formatNum(userCoins)})`;
+                costEl.style.color = userCoins >= cost ? '#55d6ff' : '#e74c3c';
+
+                document.getElementById('btn-roll-passive').disabled = (userCoins < cost);
+            } else {
+                document.getElementById('p-detail-name').innerText = "Nenhum lutador no inventário";
+                document.getElementById('btn-roll-passive').disabled = true;
+            }
+        }
+
+        function doRerollPassive() {
+            const f = state.inventory.find(x => x.id === selectedPassiveFighterId);
+            if (!f) return;
+
+            const isl = ISLANDS[passiveIslandId];
+            const cost = isl.reroll_cost;
+            const userCoins = state.currencies[isl.currency_id] || 0;
+
+            if (userCoins < cost) {
+                showNotification("Moedas insuficientes!", "#e74c3c");
+                return;
+            }
+
+            state.currencies[isl.currency_id] -= cost;
+            const newPassiveId = rollRandomPassive();
+            f.passive_id = newPassiveId;
+            f.dps = calculateFighterDps(f.base_dps, f.level, newPassiveId);
+
+            const p = PASSIVES[newPassiveId];
+            const pColor = RARITY_COLORS[p.rarity] || '#fff';
+
+            playSound('reroll');
+            const toast = document.getElementById('p-result-toast');
+            toast.innerText = `ROLADO: [${p.rarity}] ${p.name}! (${p.description})`;
+            toast.style.color = pColor;
+
+            showNotification(`Nova Passiva: [${p.rarity}] ${p.name}!`, pColor);
+
+            updateFighterMeshes();
+            renderPassiveModal();
+            updateHUD();
+            saveGame();
+        }
+
+        /* --- DIMENSION VISIBILITY (Only current island rendered) --- */
+        function updateIslandsVisibility(currentId) {
+            for (let i = 1; i <= 10; i++) {
+                if (islandRoots[i]) {
+                    islandRoots[i].visible = (i === currentId);
+                }
+            }
+            mobsList.forEach(m => {
+                m.root.visible = (m.island_id === currentId && !m.is_dead);
+            });
+        }
+
+        /* --- TELEPORT TO ISLAND --- */
+        function teleportToIsland(id) {
+            const isl = ISLANDS[id];
+            state.current_island = id;
+            playerRoot.position.set(0, 0, isl.z_pos + 25);
+            updateIslandsVisibility(id);
+            clearTarget();
+            showNotification(`Viajou para: ${isl.name}`, "#3498db");
+            updateHUD();
+        }
+
+        /* --- HUD & NOTIFICATIONS --- */
+        function updateHUD() {
+            const isl = ISLANDS[state.current_island || 1];
+            document.getElementById('island-title').innerText = `Ilha ${isl.id}: ${isl.name}`;
+            const coins = state.currencies[isl.currency_id] || 0;
+            document.getElementById('currency-text').innerText = `${isl.currency_name}: ${formatNum(coins)}`;
+
+            const equipped = state.inventory.filter(f => state.equipped_ids.includes(f.id));
+            const totalDps = equipped.reduce((sum, f) => sum + f.dps, 0);
+            document.getElementById('team-dps-text').innerText = `DPS da Equipe: ${formatNum(totalDps)} (${equipped.length}/3)`;
+            document.getElementById('inv-equipped-count').innerText = `Equipados: ${equipped.length} / 3`;
+        }
+
+        let notifyTimeout = null;
+        function showNotification(text, color = "#fff") {
+            const el = document.getElementById('notification');
+            el.innerText = text;
+            el.style.borderColor = color;
+            el.style.color = color;
+            el.style.display = 'block';
+            clearTimeout(notifyTimeout);
+            notifyTimeout = setTimeout(() => el.style.display = 'none', 2500);
+        }
+
+        /* --- MODALS LOGIC --- */
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            const isVisible = modal.style.display === 'flex';
+            document.getElementById('modal-inventory').style.display = 'none';
+            document.getElementById('modal-islands').style.display = 'none';
+            document.getElementById('modal-passive').style.display = 'none';
+
+            if (!isVisible) {
+                modal.style.display = 'flex';
+                if (id === 'modal-inventory') renderInventoryGrid();
+                if (id === 'modal-islands') renderIslandsList();
+                if (id === 'modal-passive') renderPassiveModal();
+            }
+        }
+
+        function renderInventoryGrid() {
+            const container = document.getElementById('inv-cards-container');
+            container.innerHTML = '';
+
+            state.inventory.forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'fighter-card';
+                card.style.borderColor = RARITY_COLORS[f.rarity] || '#bdc3c7';
+
+                const isEquipped = state.equipped_ids.includes(f.id);
+                const reqXp = getXpNeeded(f.level);
+                const xpPct = f.level >= 250 ? 100 : Math.min(100, Math.floor((f.xp / reqXp) * 100));
+                const p = PASSIVES[f.passive_id] || PASSIVES['none'];
+                const pColor = RARITY_COLORS[p.rarity] || '#888';
+
+                card.innerHTML = `
+                    <div class="card-rarity" style="color:${RARITY_COLORS[f.rarity]}">${f.rarity}</div>
+                    <div class="card-name">${f.name}</div>
+                    <div class="card-level">Nv. ${f.level} / 250</div>
+                    <div class="card-xp-bar">
+                        <div class="card-xp-fill" style="width:${xpPct}%"></div>
+                    </div>
+                    <div class="card-xp-text">${f.level >= 250 ? 'NÍVEL MÁXIMO' : `XP: ${formatNum(f.xp)} / ${formatNum(reqXp)}`}</div>
+                    <div class="card-passive" style="color:${pColor};">★ ${p.name}</div>
+                    <div class="card-dps">DPS: ${formatNum(f.dps)}</div>
+                    <button class="card-btn ${isEquipped ? 'card-btn-unequip' : 'card-btn-equip'}">
+                        ${isEquipped ? 'Desequipar' : 'Equipar'}
+                    </button>
+                `;
+                const btn = card.querySelector('button');
+                btn.onclick = () => {
+                    if (isEquipped) {
+                        state.equipped_ids = state.equipped_ids.filter(id => id !== f.id);
+                    } else {
+                        if (state.equipped_ids.length < 3) {
+                            state.equipped_ids.push(f.id);
+                        } else {
+                            showNotification("Limite de 3 lutadores atingido!", "#e67e22");
+                        }
+                    }
+                    updateFighterMeshes();
+                    renderInventoryGrid();
+                    saveGame();
+                };
+                container.appendChild(card);
+            });
+        }
+
+        function equipBest() {
+            const sorted = [...state.inventory].sort((a, b) => b.dps - a.dps);
+            state.equipped_ids = sorted.slice(0, 3).map(f => f.id);
+            updateFighterMeshes();
+            renderInventoryGrid();
+            saveGame();
+            showNotification("Melhores lutadores equipados!", "#2ecc71");
+        }
+
+        function renderIslandsList() {
+            const container = document.getElementById('island-rows-container');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 10; i++) {
+                const isl = ISLANDS[i];
+                const isUnlocked = state.unlocked_islands.includes(i);
+                const isCurrent = state.current_island === i;
+
+                const row = document.createElement('div');
+                row.className = 'island-row';
+
+                let actionHtml = '';
+                if (isCurrent) {
+                    actionHtml = `<span style="color:#2ecc71; font-weight:bold;">[Aqui]</span>`;
+                } else if (isUnlocked) {
+                    actionHtml = `<button class="btn" style="padding:6px 14px;" onclick="teleportToIsland(${i}); toggleModal('modal-islands');">Teleportar</button>`;
+                } else {
+                    actionHtml = `<button class="btn" style="padding:6px 14px; border-color:#f1c40f; color:#f1c40f;" onclick="unlockFromMenu(${i})">Desbloquear (${formatNum(isl.unlock_cost)})</button>`;
+                }
+
+                row.innerHTML = `
+                    <div class="island-info">
+                        <h4>Ilha ${isl.id}: ${isl.name}</h4>
+                        <p>Moeda: ${isl.currency_name} | Mob: +${formatNum(isl.mob_drop)} | Chefe: +${formatNum(isl.boss_drop)}</p>
+                    </div>
+                    <div>${actionHtml}</div>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        window.unlockFromMenu = function(id) {
+            const isl = ISLANDS[id];
+            const curr = state.currencies[isl.unlock_curr_id] || 0;
+            if (curr >= isl.unlock_cost) {
+                state.currencies[isl.unlock_curr_id] -= isl.unlock_cost;
+                state.unlocked_islands.push(id);
+                showNotification(`Desbloqueou: ${isl.name}!`, "#2ecc71");
+                teleportToIsland(id);
+                toggleModal('modal-islands');
+                saveGame();
+            } else {
+                showNotification("Moedas insuficientes!", "#e74c3c");
+            }
+        };
+
+        // Attach UI Buttons (Desktop & Modals)
+        document.getElementById('btn-inventory').onclick = () => toggleModal('modal-inventory');
+        document.getElementById('btn-islands').onclick = () => toggleModal('modal-islands');
+        document.getElementById('btn-passives').onclick = () => openPassiveModal(state.current_island);
+        document.getElementById('btn-equip-best').onclick = equipBest;
+        document.getElementById('modal-btn-equip-best').onclick = equipBest;
+        document.getElementById('btn-save').onclick = saveGame;
+        document.getElementById('btn-roll-passive').onclick = doRerollPassive;
+
+        // Mobile Top Quick Nav Buttons
+        const mBtnInv = document.getElementById('m-btn-inv');
+        if (mBtnInv) mBtnInv.onclick = () => toggleModal('modal-inventory');
+
+        const mBtnIslands = document.getElementById('m-btn-islands');
+        if (mBtnIslands) mBtnIslands.onclick = () => toggleModal('modal-islands');
+
+        const mBtnPassives = document.getElementById('m-btn-passives');
+        if (mBtnPassives) mBtnPassives.onclick = () => openPassiveModal(state.current_island);
+
+        const mBtnEquip = document.getElementById('m-btn-equip');
+        if (mBtnEquip) mBtnEquip.onclick = equipBest;
+
+        const mBtnSave = document.getElementById('m-btn-save');
+        if (mBtnSave) mBtnSave.onclick = saveGame;
+
+        const mBtnFs = document.getElementById('m-btn-fs');
+        if (mBtnFs) mBtnFs.onclick = toggleFullscreen;
+
+        const targetCloseBtn = document.getElementById('target-close-btn');
+        if (targetCloseBtn) targetCloseBtn.onclick = clearTarget;
+
+        document.getElementById('modal-close-inv').onclick = () => toggleModal('modal-inventory');
+        document.getElementById('modal-close-islands').onclick = () => toggleModal('modal-islands');
+        document.getElementById('modal-close-passive').onclick = () => toggleModal('modal-passive');
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            updateOrientationClass();
+        });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                updateOrientationClass();
+            }, 120);
+        });
+
+        // Initialize scene
+        updateFighterMeshes();
+        updateHUD();
+        updateIslandsVisibility(state.current_island || 1);
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
