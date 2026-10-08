@@ -1234,7 +1234,7 @@
     <!-- INVENTORY MODAL -->
     <div class="modal" id="modal-inventory">
         <div class="modal-header">
-            <div class="modal-title">INVENTÁRIO DE LUTADORES (TETO NV. 250)</div>
+            <div class="modal-title">INVENTÁRIO DE LUTADORES (TETO NV. 500)</div>
             <div style="display:flex; gap:10px; align-items:center;">
                 <span id="inv-equipped-count" style="color:#55d6ff; font-weight:bold;">Equipados: 1 / 3</span>
                 <button class="btn btn-green" style="padding:6px 12px; font-size:12px;" id="modal-btn-equip-best">Equipar Melhores</button>
@@ -1633,6 +1633,15 @@
         };
 
         function formatNum(val) {
+            if (val === null || val === undefined || isNaN(val)) return "0";
+            if (!isFinite(val)) return "∞";
+            if (val >= 1e33) return val.toExponential(2);
+            if (val >= 1e30) return (val / 1e30).toFixed(2) + "No";
+            if (val >= 1e27) return (val / 1e27).toFixed(2) + "Oc";
+            if (val >= 1e24) return (val / 1e24).toFixed(2) + "Sp";
+            if (val >= 1e21) return (val / 1e21).toFixed(2) + "Sx";
+            if (val >= 1e18) return (val / 1e18).toFixed(2) + "Qi";
+            if (val >= 1e15) return (val / 1e15).toFixed(2) + "Qa";
             if (val >= 1e12) return (val / 1e12).toFixed(2) + "T";
             if (val >= 1e9) return (val / 1e9).toFixed(2) + "B";
             if (val >= 1e6) return (val / 1e6).toFixed(2) + "M";
@@ -1641,8 +1650,11 @@
         }
 
         /* --- LEVELING & XP FORMULAS --- */
+        const MAX_FIGHTER_LEVEL = 500;
+
         function getXpNeeded(level) {
-            return Math.floor(100 * Math.pow(1.035, level - 1) + (level * 50));
+            const lvl = Math.max(1, Math.floor(level || 1));
+            return Math.floor(100 * Math.pow(2, lvl - 1));
         }
 
         function calculateFighterDps(baseDps, level, passiveId) {
@@ -3349,9 +3361,9 @@
             // Distribute XP to equipped fighters
             let anyLevelUp = false;
             equipped.forEach(f => {
-                if (f.level < 250) {
+                if (f.level < MAX_FIGHTER_LEVEL) {
                     f.xp += finalXp;
-                    while (f.level < 250) {
+                    while (f.level < MAX_FIGHTER_LEVEL) {
                         const req = getXpNeeded(f.level);
                         if (f.xp >= req) {
                             f.xp -= req;
@@ -3696,7 +3708,7 @@
                 const pColor = RARITY_COLORS[p.rarity] || '#bdc3c7';
                 item.innerHTML = `
                     <div style="font-weight:bold; color:${RARITY_COLORS[f.rarity]};">${f.name}</div>
-                    <div style="font-size:11px; color:#55d6ff;">Nv. ${f.level}/250 | DPS: ${formatNum(f.dps)}</div>
+                    <div style="font-size:11px; color:#55d6ff;">Nv. ${f.level}/500 | DPS: ${formatNum(f.dps)}</div>
                     <div style="font-size:11px; color:${pColor};">★ ${p.name}</div>
                 `;
                 item.onclick = () => {
@@ -3711,7 +3723,7 @@
             if (f) {
                 document.getElementById('p-detail-name').innerText = `${f.name} [${f.rarity}]`;
                 document.getElementById('p-detail-name').style.color = RARITY_COLORS[f.rarity];
-                document.getElementById('p-detail-level').innerText = `Nível: ${f.level} / 250`;
+                document.getElementById('p-detail-level').innerText = `Nível: ${f.level} / 500`;
                 document.getElementById('p-detail-dps').innerText = `DPS Total: ${formatNum(f.dps)} (Base: ${formatNum(f.base_dps)})`;
                 
                 const p = PASSIVES[f.passive_id] || PASSIVES['none'];
@@ -3843,7 +3855,7 @@
 
                 const isEquipped = state.equipped_ids.includes(f.id);
                 const reqXp = getXpNeeded(f.level);
-                const xpPct = f.level >= 250 ? 100 : Math.min(100, Math.floor((f.xp / reqXp) * 100));
+                const xpPct = f.level >= 500 ? 100 : Math.min(100, Math.floor((f.xp / reqXp) * 100));
                 const p = PASSIVES[f.passive_id] || PASSIVES['none'];
                 const pColor = RARITY_COLORS[p.rarity] || '#888';
 
@@ -3856,11 +3868,11 @@
                     <div class="card-rarity" style="color:${RARITY_COLORS[f.rarity]}">${f.rarity}</div>
                     ${avatarHtml}
                     <div class="card-name">${f.name}</div>
-                    <div class="card-level">Nv. ${f.level} / 250</div>
+                    <div class="card-level">Nv. ${f.level} / 500</div>
                     <div class="card-xp-bar">
                         <div class="card-xp-fill" style="width:${xpPct}%"></div>
                     </div>
-                    <div class="card-xp-text">${f.level >= 250 ? 'NÍVEL MÁXIMO' : `XP: ${formatNum(f.xp)} / ${formatNum(reqXp)}`}</div>
+                    <div class="card-xp-text">${f.level >= 500 ? 'NÍVEL MÁXIMO' : `XP: ${formatNum(f.xp)} / ${formatNum(reqXp)}`}</div>
                     <div class="card-passive" style="color:${pColor};">★ ${p.name}</div>
                     <div class="card-dps">DPS: ${formatNum(f.dps)}</div>
                     <button class="card-btn ${isEquipped ? 'card-btn-unequip' : 'card-btn-equip'}">
